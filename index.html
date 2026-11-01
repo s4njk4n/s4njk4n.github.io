@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>XDC Outpost: post-quantum messaging and practical tools for the XDC Network</title>
+  <meta name="description" content="Post-quantum encrypted messaging on XDC mainnet (ML-KEM-768, NIST FIPS 203), plus open-source tools for XDC node operators, masternode owners and everyday users.">
+  <link rel="canonical" href="https://xdcoutpost.xyz/">
+  <meta name="theme-color" content="#1E1A4A">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://xdcoutpost.xyz/">
+  <meta property="og:title" content="XDC Outpost">
+  <meta property="og:description" content="Post-quantum encrypted messaging on XDC mainnet, plus practical tools for node operators, masternode owners and everyday XDC users.">
+  <meta property="og:image" content="https://xdcoutpost.xyz/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@s4njk4n">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      { "@type": "WebSite", "name": "XDC Outpost", "url": "https://xdcoutpost.xyz/",
+        "author": { "@id": "#s4njk4n" } },
+      { "@type": "Person", "@id": "#s4njk4n", "name": "s4njk4n",
+        "sameAs": ["https://github.com/s4njk4n", "https://x.com/s4njk4n", "https://t.me/s4njk4n"] },
+      { "@type": "SoftwareApplication", "name": "XDC PQOnchain",
+        "applicationCategory": "SecurityApplication", "operatingSystem": "Web browser",
+        "url": "https://xdcoutpost.xyz/XDC_PQOnchain/",
+        "description": "Post-quantum encrypted messaging on the XDC Network using ML-KEM-768 and AES-256-GCM, entirely client-side.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "author": { "@id": "#s4njk4n" } }
+    ]
+  }
+  </script>
+
+  <link rel="preload" href="assets/fonts/bricolage.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/instrument-sans.woff2" as="font" type="font/woff2" crossorigin>
+
+  <style>
+    @font-face {
+      font-family: "Bricolage";
+      src: url("assets/fonts/bricolage.woff2") format("woff2-variations");
+      font-weight: 200 800;
+      font-stretch: 75% 100%;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "Instrument Sans";
+      src: url("assets/fonts/instrument-sans.woff2") format("woff2-variations");
+      font-weight: 400 700;
+      font-stretch: 75% 100%;
+      font-display: swap;
+    }
+
+    :root {
+      --night: #1E1A4A;
+      --dusk: #2B2566;
+      --line: #443D84;
+      --ink: #F2EDFF;
+      --mist: #C3B8EA;
+      --signal: #8FDCFF;
+      --flare: #FF9EBB;
+
+      --display: "Bricolage", "Avenir Next", "Segoe UI", sans-serif;
+      --body: "Instrument Sans", "Helvetica Neue", "Segoe UI", sans-serif;
+
+      --wrap: 72rem;
+      --gutter: clamp(1.25rem, 4vw, 2.5rem);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+    body {
+      margin: 0;
+      background: var(--night);
+      color: var(--ink);
+      font-family: var(--body);
+      font-size: 1.0625rem;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--signal); text-underline-offset: 0.2em; }
+    a:hover { color: var(--ink); }
+    :focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; border-radius: 4px; }
+
+    .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 var(--gutter); }
+
+    .skip {
+      position: absolute; left: 1rem; top: -3rem;
+      background: var(--signal); color: var(--night);
+      padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; z-index: 20;
+    }
+    .skip:focus { top: 1rem; }
+
+    /* ---------- Header ---------- */
+    .site-header {
+      position: sticky; top: 0; z-index: 10;
+      background: rgb(30 26 74 / 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.2s;
+    }
+    .site-header.scrolled { border-bottom-color: var(--line); }
+    .site-header .wrap {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 4rem; gap: 1rem;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 0.6rem;
+      color: var(--ink); text-decoration: none;
+      font-family: var(--display); font-weight: 700; font-size: 1.2rem;
+      letter-spacing: -0.01em;
+    }
+    .brand svg { width: 1.6rem; height: 1.6rem; flex: none; }
+    .site-nav { display: flex; gap: clamp(1rem, 3vw, 2rem); }
+    .site-nav a {
+      color: var(--mist); text-decoration: none; font-size: 0.95rem; font-weight: 500;
+    }
+    .site-nav a:hover { color: var(--ink); }
+    .brand { white-space: nowrap; }
+    @media (max-width: 560px) { .site-nav .wide { display: none; } }
+    .nb { white-space: nowrap; }
+    .site-nav a { white-space: nowrap; padding: 0.75rem 0; }
+    @media (max-width: 380px) {
+      .brand { font-size: 1.05rem; gap: 0.45rem; }
+      .brand svg { width: 1.35rem; height: 1.35rem; }
+      .site-nav { gap: 0.9rem; }
+      .site-nav a { font-size: 0.875rem; }
+    }
+    .site-footer a { display: inline-block; padding: 0.6rem 0; }
+
+    /* ---------- Hero ---------- */
+    .hero { position: relative; padding: clamp(4rem, 10vw, 7.5rem) 0 0; overflow: hidden; }
+    .hero h1 {
+      font-family: var(--display);
+      font-weight: 750;
+      font-stretch: 82%;
+      font-size: clamp(2.75rem, 8.5vw, 6.25rem);
+      line-height: 0.95;
+      letter-spacing: -0.028em;
+      margin: 0 0 1.75rem;
+      max-width: 11ch;
+      text-wrap: balance;
+    }
+    .hero .lede {
+      font-size: clamp(1.125rem, 2vw, 1.3rem);
+      color: var(--mist);
+      max-width: 34em;
+      margin: 0 0 2.5rem;
+    }
+    .hero .lede a { color: var(--ink); }
+
+    .routes { margin: 0; align-self: end; }
+    .routes p { margin: 0 0 0.75rem; font-weight: 600; color: var(--ink); }
+    .routes ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .routes a {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.8rem 1.25rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--dusk);
+      color: var(--ink); text-decoration: none; font-weight: 500;
+      transition: border-color 0.15s, background-color 0.15s;
+    }
+    .routes a:hover { border-color: var(--signal); background: #332C75; }
+    .routes svg { width: 1.1rem; height: 1.1rem; stroke: var(--signal); fill: none; stroke-width: 1.75; flex: none; }
+
+    .hero-grid { display: grid; gap: 2.5rem 4rem; grid-template-areas: "title" "lede" "feature" "routes"; }
+    .hero-grid h1 { grid-area: title; }
+    .hero-grid .lede { grid-area: lede; }
+    .hero-grid .feature { grid-area: feature; }
+    .hero-grid .routes { grid-area: routes; }
+    .hero-grid h1, .hero-grid .lede { margin-bottom: 0; }
+    @media (min-width: 1024px) {
+      .hero-grid {
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+        grid-template-areas: "title feature" "lede feature" "routes feature";
+        grid-template-rows: auto auto 1fr;
+      }
+      .hero h1 { font-size: clamp(3.5rem, 6.2vw, 5.5rem); }
+    }
+
+    /* Featured: PQOnchain */
+    .feature {
+      background: var(--dusk);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: clamp(1.5rem, 3vw, 2.25rem);
+      align-self: start;
+    }
+    .feature-flag {
+      display: inline-flex; align-items: center; gap: 0.55rem;
+      margin: 0 0 1rem; font-size: 0.875rem; font-weight: 600; color: #B9F0D6;
+    }
+    .feature-flag .live { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #6EE7B7; box-shadow: 0 0 0 4px rgb(110 231 183 / 0.18); }
+    .feature h2 {
+      font-family: var(--display); font-weight: 720; font-stretch: 88%;
+      font-size: clamp(1.75rem, 3vw, 2.25rem); line-height: 1.05; letter-spacing: -0.02em;
+      margin: 0 0 1rem; text-wrap: balance;
+    }
+    .feature > p { margin: 0 0 1.25rem; color: var(--mist); font-size: 1rem; }
+    .feature > p strong { color: var(--ink); font-weight: 600; }
+
+    .payload { margin: 0 0 1.25rem; }
+    .payload-bar { display: flex; height: 2.75rem; border-radius: 8px; overflow: hidden; font-size: 0.8rem; font-weight: 600; }
+    .payload-bar span { display: flex; align-items: center; padding: 0 0.75rem; white-space: nowrap; overflow: hidden; }
+    .seg-kem { flex: 5.2; background: var(--signal); color: var(--night); }
+    .seg-iv  { flex: 0.9; background: #C9BCF5; color: var(--night); justify-content: center; padding: 0 0.25rem !important; }
+    .seg-msg { flex: 2.6; background: #FFC7D7; color: var(--night); }
+    .payload-key { display: grid; grid-template-columns: auto 1fr; gap: 0.2rem 0.75rem; margin: 0.75rem 0 0; font-size: 0.85rem; color: var(--mist); }
+    .payload-key dt { color: var(--ink); font-weight: 600; }
+    .payload-key dd { margin: 0; }
+    .payload figcaption { font-size: 0.85rem; color: var(--mist); margin: 0 0 0.5rem; }
+
+    .feature .why { font-size: 0.925rem; border-left: 2px solid var(--flare); padding-left: 0.9rem; }
+    .feature .actions { margin-top: 0; }
+
+    .kind-pq { color: var(--night); background: var(--signal); border-color: var(--signal); }
+
+    /* The horizon: ridge line with the outpost and its beacon */
+    .horizon { display: block; width: 100%; height: auto; margin-top: clamp(2rem, 6vw, 4rem); }
+    .horizon .ridge { fill: none; stroke: var(--line); stroke-width: 1.5; }
+    .horizon .ground { fill: #19163F; }
+    .horizon .tower { fill: none; stroke: var(--mist); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+    .horizon .lamp { fill: var(--flare); }
+    .horizon .ring { fill: none; stroke: var(--flare); stroke-width: 1.5; transform-box: fill-box; transform-origin: center; opacity: 0; }
+    .horizon .ring { animation: pulse 4.5s cubic-bezier(0.2, 0.6, 0.3, 1) infinite; }
+    .horizon .ring:nth-of-type(2) { animation-delay: 1.5s; }
+    .horizon .ring:nth-of-type(3) { animation-delay: 3s; }
+    @keyframes pulse {
+      0%   { transform: scale(0.2); opacity: 0.9; }
+      100% { transform: scale(1);   opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .horizon .ring { animation: none; opacity: 0.35; }
+      .horizon .ring:nth-of-type(2) { opacity: 0.2; }
+      .horizon .ring:nth-of-type(3) { opacity: 0.1; }
+    }
+
+    /* ---------- Tool catalogue ---------- */
+    .catalogue { background: #19163F; padding: clamp(3rem, 7vw, 5rem) 0 clamp(4rem, 8vw, 6rem); }
+    .catalogue > .wrap > h2 {
+      font-family: var(--display); font-weight: 700; font-stretch: 90%;
+      font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -0.02em; line-height: 1.1;
+      margin: 0 0 0.5rem;
+    }
+    .catalogue > .wrap > p { color: var(--mist); margin: 0 0 3rem; max-width: 36em; }
+
+    .group {
+      display: grid; gap: 1.5rem 3rem;
+      grid-template-columns: 1fr;
+      padding: 2.5rem 0;
+      border-top: 1px solid var(--line);
+    }
+    @media (min-width: 900px) {
+      .group { grid-template-columns: 17rem 1fr; }
+      .group-head { position: sticky; top: 6rem; align-self: start; }
+    }
+    .group-head h3 {
+      font-family: var(--display); font-weight: 700; font-stretch: 90%;
+      font-size: 1.6rem; line-height: 1.15; letter-spacing: -0.015em; margin: 0 0 0.5rem;
+    }
+    .group-head p { color: var(--mist); margin: 0; font-size: 0.975rem; }
+
+    .tools { list-style: none; margin: 0; padding: 0; }
+    .tool {
+      display: grid; gap: 0.5rem 2rem;
+      grid-template-columns: 1fr;
+      padding: 1.75rem 0;
+      border-bottom: 1px solid rgb(68 61 132 / 0.6);
+    }
+    .tool:first-child { padding-top: 0; }
+    .tool:last-child { border-bottom: 0; padding-bottom: 0; }
+    @media (min-width: 640px) {
+      .tool { grid-template-columns: 1fr auto; }
+      .tool .actions { grid-column: 2; grid-row: 1 / span 3; align-self: start; justify-content: flex-end; }
+    }
+    .tool h4 {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.75rem;
+      font-family: var(--display); font-weight: 650; font-size: 1.3rem; letter-spacing: -0.01em;
+      line-height: 1.25; margin: 0;
+    }
+    .tool .desc { margin: 0; max-width: 40em; }
+    .tool .detail { margin: 0; color: var(--mist); font-size: 0.95rem; max-width: 40em; }
+
+    .kind {
+      font-family: var(--body); font-weight: 600; font-size: 0.75rem; letter-spacing: 0.01em;
+      padding: 0.15rem 0.6rem; border-radius: 999px;
+      border: 1px solid currentColor; white-space: nowrap;
+    }
+    .kind-web  { color: var(--signal); }
+    .kind-repo { color: var(--mist); }
+    .kind-bot  { color: #B9F0D6; }
+    .kind-soon { color: var(--flare); border-style: dashed; }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.5rem; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.6rem 1.1rem; border-radius: 8px;
+      font-weight: 600; font-size: 0.95rem; text-decoration: none; white-space: nowrap;
+      transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .btn-primary { background: var(--signal); color: var(--night); }
+    .btn-primary:hover { background: var(--ink); color: var(--night); }
+    .btn-ghost { border: 1px solid var(--line); color: var(--ink); }
+    .btn-ghost:hover { border-color: var(--signal); color: var(--ink); }
+    .btn svg { width: 1rem; height: 1rem; fill: currentColor; flex: none; }
+    .pending { color: var(--mist); font-size: 0.95rem; margin-top: 0.5rem; white-space: nowrap; }
+
+    /* ---------- Contact ---------- */
+    .contact { padding: clamp(4rem, 8vw, 6rem) 0; }
+    .contact .wrap { display: grid; gap: 2rem 4rem; }
+    @media (min-width: 900px) { .contact .wrap { grid-template-columns: 1fr 1fr; align-items: start; } }
+    .contact h2 {
+      font-family: var(--display); font-weight: 700; font-stretch: 90%;
+      font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -0.02em; line-height: 1.1; margin: 0 0 1rem;
+    }
+    .contact p { color: var(--mist); margin: 0; max-width: 30em; }
+    .channels { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+    .channels a {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem 0.25rem; border-bottom: 1px solid var(--line);
+      color: var(--ink); text-decoration: none;
+    }
+    .channels a:hover { color: var(--signal); }
+    .channels svg { width: 1.4rem; height: 1.4rem; fill: currentColor; flex: none; }
+    .channels .name { font-weight: 600; min-width: 5.5rem; }
+    .channels .handle { color: var(--mist); }
+
+    /* ---------- Footer ---------- */
+    .site-footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--mist); font-size: 0.9rem; }
+    .site-footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; }
+    .site-footer p { margin: 0; }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#tools">Skip to tools</a>
+
+  <!-- Icon sprite -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-beacon" viewBox="0 0 32 32">
+      <path d="M11 29 L16 11 L21 29 M12.6 23 H19.4 M13.8 18 H18.2" fill="none" stroke="#C3B8EA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="16" cy="7.5" r="3" fill="#FF9EBB"/>
+      <path d="M9.5 4.5 A9 9 0 0 0 9.5 10.5 M22.5 4.5 A9 9 0 0 1 22.5 10.5" fill="none" stroke="#FF9EBB" stroke-width="1.75" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></symbol>
+    <symbol id="i-telegram" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.210.258-1.910.177-.184 3.247-2.977 3.307-3.230.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></symbol>
+    <symbol id="i-discord" viewBox="0 0 24 24"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></symbol>
+  </svg>
+
+  <header class="site-header" id="top">
+    <div class="wrap">
+      <a class="brand" href="#top" aria-label="XDC Outpost, back to top">
+        <svg aria-hidden="true"><use href="#i-beacon"/></svg>
+        XDC Outpost
+      </a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="#pq">Post-quantum</a>
+        <a href="#tools">Tools</a>
+        <a class="wide" href="#contact">Contact</a>
+        <a class="wide" href="https://github.com/s4njk4n" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap hero-grid">
+        <h1 id="hero-title">Practical tools for the XDC Network</h1>
+        <p class="lede">Post-quantum messaging, node monitoring, offline signing and more, for node operators, masternode owners and everyday XDC users. Open source and built by <a href="https://github.com/s4njk4n" target="_blank" rel="noopener">s4njk4n</a>.</p>
+
+        <aside class="feature" id="pq" aria-labelledby="pq-title">
+          <p class="feature-flag"><span class="live" aria-hidden="true"></span>New and live on XDC mainnet</p>
+          <h2 id="pq-title">Post-quantum encrypted messaging on XDC</h2>
+          <p><strong>XDC PQOnchain</strong> encrypts messages with <span class="nb">ML-KEM-768</span>, the key-encapsulation standard NIST published as FIPS 203, and sends them as XDC transaction data. Keys are created and used only in your browser.</p>
+          <figure class="payload">
+            <figcaption>What every message looks like on chain</figcaption>
+            <div class="payload-bar" role="img" aria-label="Transaction data: 1,088-byte ML-KEM-768 ciphertext, 12-byte IV, then the AES-256-GCM encrypted message">
+              <span class="seg-kem">ML-KEM-768</span><span class="seg-iv">IV</span><span class="seg-msg">Message</span>
+            </div>
+            <dl class="payload-key">
+              <dt class="nb">ML-KEM-768</dt><dd>1,088-byte encapsulated key, opened only by the recipient’s private key</dd>
+              <dt>IV</dt><dd>12 random bytes</dd>
+              <dt>Message</dt><dd>Your text, encrypted with AES-256-GCM</dd>
+            </dl>
+          </figure>
+          <p class="why">A public chain keeps data forever. “Harvest now, decrypt later” attacks store encrypted data today to crack once quantum computers mature. ML-KEM is designed to hold up against them.</p>
+          <div class="actions">
+            <a class="btn btn-primary" href="/XDC_PQOnchain/">Try PQOnchain</a>
+            <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_PQOnchain" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-github"/></svg>Read the source</a>
+          </div>
+        </aside>
+
+        <nav class="routes" aria-label="Find a tool">
+          <p>What are you working on?</p>
+          <ul>
+            <li><a href="#nodes">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg>
+              Running a node or masternode</a></li>
+            <li><a href="#transact">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h14l-3-3M20 16H6l3 3"/></svg>
+              Sending XDC and private messages</a></li>
+            <li><a href="#learn">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>
+              Learning about XDC</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <svg class="horizon" viewBox="0 -40 1440 260" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+        <path class="ground" d="M0 170 C 140 150, 260 120, 400 128 S 640 168, 780 150 S 980 92, 1080 96 S 1300 150, 1440 140 L1440 220 L0 220 Z"/>
+        <path class="ridge" d="M0 170 C 140 150, 260 120, 400 128 S 640 168, 780 150 S 980 92, 1080 96 S 1300 150, 1440 140"/>
+        <g transform="translate(1080 96)">
+          <path class="tower" d="M-16 0 L0 -58 L16 0 M-11 -18 H11 M-7 -34 H7 M-4 -46 L4 -46"/>
+          <circle class="ring" cx="0" cy="-66" r="56"/>
+          <circle class="ring" cx="0" cy="-66" r="56"/>
+          <circle class="ring" cx="0" cy="-66" r="56"/>
+          <circle class="lamp" cx="0" cy="-66" r="6"/>
+        </g>
+      </svg>
+    </section>
+
+    <section class="catalogue" id="tools" aria-labelledby="tools-title">
+      <div class="wrap">
+        <h2 id="tools-title">Tools</h2>
+        <p>Web apps open straight in your browser. Self-hosted tools are installed from GitHub on your own server.</p>
+
+        <!-- Nodes -->
+        <div class="group" id="nodes">
+          <div class="group-head">
+            <h3>Running a node or masternode</h3>
+            <p>Set up, monitor and keep your infrastructure earning.</p>
+          </div>
+          <ul class="tools">
+            <li class="tool">
+              <h4>Plugin XDC Secure RPC &amp; WSS <span class="kind kind-repo">Self-hosted</span></h4>
+              <p class="desc">An installer for Plugin RPCaaS operators. Sets up a hardened XDC node on Mainnet or Apothem with private RPC and WebSocket endpoints that only whitelisted IPs can reach.</p>
+              <p class="detail">One-script setup with Nginx and TLS. The included scripts manage the whitelist for you.</p>
+              <div class="actions">
+                <a class="btn btn-ghost" href="https://github.com/s4njk4n/Plugin-XDC-Secure-RPC-WSS" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-github"/></svg>View on GitHub</a>
+              </div>
+            </li>
+            <li class="tool">
+              <h4>XDC Sentinel <span class="kind kind-repo">Self-hosted</span></h4>
+              <p class="desc">Get a phone alert when one of your XDC nodes goes offline, a reminder every 2 hours until it’s back, and a daily message confirming everything is running.</p>
+              <p class="detail">Notifications on iOS and Android.</p>
+              <div class="actions">
+                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_Sentinel" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-github"/></svg>View on GitHub</a>
+              </div>
+            </li>
+            <li class="tool">
+              <h4>XDC Tycoon <span class="kind kind-repo">Self-hosted</span></h4>
+              <p class="desc">Watch your masternode owner addresses and get notified when their status changes (masternode, standby, slashed and so on) and when educational reward top-up payments arrive.</p>
+              <p class="detail">Notifications on iOS and Android.</p>
+              <div class="actions">
+                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_Tycoon" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-github"/></svg>View on GitHub</a>
+              </div>
+            </li>
+            <li class="tool">
+              <h4>Masternode Epoch Rewards Calculator <span class="kind kind-web">Web app</span></h4>
+              <p class="desc">Work out the epoch rewards an address earned as a masternode over a time period you choose, inferred from on-chain data.</p>
+              <div class="actions">
+                <a class="btn btn-primary" href="/XDC_Masternode_Rewards_Calculator/">Open calculator</a>
+              </div>
+            </li>
+            <li class="tool">
+              <h4>XDC FieldMedic <span class="kind kind-soon">In development</span></h4>
+              <p class="desc">A repair bot for XDC RPC endpoints. It will spot errors or lag as they happen and run remote repairs automatically, keeping downtime to a minimum.</p>
+              <div class="actions"><span class="pending">Not released yet</span></div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Transacting -->
+        <div class="group" id="transact">
+          <div class="group-head">
+            <h3>Sending XDC and private messages</h3>
+            <p>Message privately, sign safely, get paid and keep records.</p>
+          </div>
+          <ul class="tools">
+            <li class="tool">
+              <h4>XDC PQOnchain <span class="kind kind-pq">Post-quantum</span> <span class="kind kind-web">Web app</span></h4>
+              <p class="desc">Send post-quantum encrypted messages on the XDC Network. Generate an ML-KEM-768 keypair, connect MetaMask, send messages as transaction data, and decrypt anything sent to you from its transaction hash.</p>
+              <p class="detail">Uses ML-KEM-768 (NIST FIPS 203) with AES-256-GCM. Everything runs in your browser, with no servers involved.</p>
+              <div class="actions">
+                <a class="btn btn-primary" href="/XDC_PQOnchain/">Open app</a>
+                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_PQOnchain" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
+              </div>
+            </li>
+            <li class="tool">
+              <h4>XDC Send Offline Helper <span class="kind kind-web">Web app</span></h4>
+              <p class="desc">Prepare transactions for an offline wallet and broadcast them once signed. Enter your address to get the transaction details, scan a QR code, or paste a signed transaction to send it to the network.</p>
+              <p class="detail">Works in a desktop or mobile browser.</p>
+              <div class="actions">
+                <a class="btn btn-primary" href="/XDC_Send_Offline_Helper/">Open app</a>
+              </div>
+            </li>
+            <li class="tool">
+              <h4>XDC Proof <span class="kind kind-web">Web app</span></h4>
+              <p class="desc">Turn an XDC payment into a PDF receipt. Enter the transaction hash, a description and optional sender and receiver details to download a verifiable proof for accounting or trade finance.</p>
+              <p class="detail">Add your own branding to each receipt.</p>
+              <div class="actions">
+                <a class="btn btn-primary" href="/XDC_Proof/">Create a receipt</a>
+              </div>
+            </li>
+            <li class="tool">
+              <h4>XDC ShopBot <span class="kind kind-bot">Telegram bot</span></h4>
+              <p class="desc">A beginner-friendly Telegram shop that sells digital products for XDC and delivers them automatically. Made for hobbyists who want to try running an online shop without advanced coding.</p>
+              <p class="detail">Free and open source. Try the demo before setting up your own.</p>
+              <div class="actions">
+                <a class="btn btn-primary" href="https://t.me/xdcshopbot" target="_blank" rel="noopener">Try the demo bot</a>
+                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_ShopBot" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Learning -->
+        <div class="group" id="learn">
+          <div class="group-head">
+            <h3>Learning about XDC</h3>
+            <p>Background reading for developers and newcomers.</p>
+          </div>
+          <ul class="tools">
+            <li class="tool">
+              <h4>XDC Library <span class="kind kind-repo">Reading list</span></h4>
+              <p class="desc">A curated, organised collection of articles and resources about the XDC Network, to help you understand how it works and what you can build on it.</p>
+              <div class="actions">
+                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDCLibrary" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-github"/></svg>Browse the library</a>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact" id="contact" aria-labelledby="contact-title">
+      <div class="wrap">
+        <div>
+          <h2 id="contact-title">Get in touch</h2>
+          <p>Questions about a tool, a bug to report, or an idea for something new? Message me on whichever platform suits you.</p>
+        </div>
+        <ul class="channels">
+          <li><a href="https://t.me/s4njk4n" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-telegram"/></svg><span class="name">Telegram</span><span class="handle">@s4njk4n</span></a></li>
+          <li><a href="https://discord.com/users/852434672793288724" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-discord"/></svg><span class="name">Discord</span><span class="handle">@s4njk4n</span></a></li>
+          <li><a href="https://x.com/s4njk4n" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-x"/></svg><span class="name">X</span><span class="handle">@s4njk4n</span></a></li>
+          <li><a href="https://github.com/s4njk4n" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-github"/></svg><span class="name">GitHub</span><span class="handle">s4njk4n</span></a></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© <span id="year">2026</span> XDC Outpost, by <a href="https://github.com/s4njk4n?tab=repositories" target="_blank" rel="noopener">s4njk4n</a></p>
+      <p><a href="#top">Back to top</a></p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const header = document.querySelector('.site-header');
+    const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 8);
+    addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  </script>
+</body>
+</html>
