@@ -338,6 +338,7 @@
     .site-footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; }
     .site-footer p { margin: 0; }
   </style>
+  <script src="/assets/analytics.js"></script>
 </head>
 <body>
   <a class="skip" href="#tools">Skip to tools</a>
@@ -365,7 +366,7 @@
         <a href="#pq">Post-quantum</a>
         <a href="#tools">Tools</a>
         <a class="wide" href="#contact">Contact</a>
-        <a class="wide" href="https://github.com/s4njk4n" target="_blank" rel="noopener">GitHub</a>
+        <a class="wide" href="https://github.com/s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="github/profile">GitHub</a>
       </nav>
     </div>
   </header>
@@ -374,7 +375,7 @@
     <section class="hero" aria-labelledby="hero-title">
       <div class="wrap hero-grid">
         <h1 id="hero-title">Practical tools for the XDC Network</h1>
-        <p class="lede">Post-quantum messaging, node monitoring, offline signing and more, for node operators, masternode owners and everyday XDC users. Open source and built by <a href="https://github.com/s4njk4n" target="_blank" rel="noopener">s4njk4n</a>.</p>
+        <p class="lede">Post-quantum messaging, node monitoring, offline signing and more, for node operators, masternode owners and everyday XDC users. Open source and built by <a href="https://github.com/s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="github/profile">s4njk4n</a>.</p>
 
         <aside class="feature" id="pq" aria-labelledby="pq-title">
           <p class="feature-flag"><span class="live" aria-hidden="true"></span>New and live on XDC mainnet</p>
@@ -393,8 +394,8 @@
           </figure>
           <p class="why">A public chain keeps data forever. “Harvest now, decrypt later” attacks store encrypted data today to crack once quantum computers mature. ML-KEM is designed to hold up against them.</p>
           <div class="actions">
-            <a class="btn btn-primary" href="/XDC_PQOnchain/">Try PQOnchain</a>
-            <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_PQOnchain" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-github"/></svg>Read the source</a>
+            <a class="btn btn-primary" href="/XDC_PQOnchain/" data-goatcounter-click="open/XDC_PQOnchain">Try PQOnchain</a>
+            <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_PQOnchain" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_PQOnchain"><svg aria-hidden="true"><use href="#i-github"/></svg>Read the source</a>
           </div>
         </aside>
 
@@ -444,7 +445,7 @@
               <p class="desc">An installer for Plugin RPCaaS operators. Sets up a hardened XDC node on Mainnet or Apothem with private RPC and WebSocket endpoints that only whitelisted IPs can reach.</p>
               <p class="detail">One-script setup with Nginx and TLS. The included scripts manage the whitelist for you.</p>
               <div class="actions">
-                <a class="btn btn-ghost" href="https://github.com/s4njk4n/Plugin-XDC-Secure-RPC-WSS" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-github"/></svg>View on GitHub</a>
+                <a class="btn btn-ghost" href="https://github.com/s4njk4n/Plugin-XDC-Secure-RPC-WSS" target="_blank" rel="noopener" data-goatcounter-click="github/Plugin-XDC-Secure-RPC-WSS"><svg aria-hidden="true"><use href="#i-github"/></svg>View on GitHub</a>
               </div>
             </li>
             <li class="tool">
@@ -452,7 +453,7 @@
               <p class="desc">Get a phone alert when one of your XDC nodes goes offline, a reminder every 2 hours until it’s back, and a daily message confirming everything is running.</p>
               <p class="detail">Notifications on iOS and Android.</p>
               <div class="actions">
-                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_Sentinel" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-github"/></svg>View on GitHub</a>
+                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_Sentinel" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_Sentinel"><svg aria-hidden="true"><use href="#i-github"/></svg>View on GitHub</a>
               </div>
             </li>
             <li class="tool">
@@ -460,14 +461,14 @@
               <p class="desc">Watch your masternode owner addresses and get notified when their status changes (masternode, standby, slashed and so on) and when educational reward top-up payments arrive.</p>
               <p class="detail">Notifications on iOS and Android.</p>
               <div class="actions">
-                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_Tycoon" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-github"/></svg>View on GitHub</a>
+                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_Tycoon" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_Tycoon"><svg aria-hidden="true"><use href="#i-github"/></svg>View on GitHub</a>
               </div>
             </li>
             <li class="tool">
               <h4>Masternode Epoch Rewards Calculator <span class="kind kind-web">Web app</span></h4>
               <p class="desc">Work out the epoch rewards an address earned as a masternode over a time period you choose, inferred from on-chain data.</p>
               <div class="actions">
-                <a class="btn btn-primary" href="/XDC_Masternode_Rewards_Calculator/">Open calculator</a>
+                <a class="btn btn-primary" href="/XDC_Masternode_Rewards_Calculator/" data-goatcounter-click="open/XDC_Masternode_Rewards_Calculator">Open calculator</a>
               </div>
             </li>
             <li class="tool">
@@ -490,8 +491,8 @@
               <p class="desc">Send post-quantum encrypted messages on the XDC Network. Generate an ML-KEM-768 keypair, connect MetaMask, send messages as transaction data, and decrypt anything sent to you from its transaction hash.</p>
               <p class="detail">Uses ML-KEM-768 (NIST FIPS 203) with AES-256-GCM. Everything runs in your browser, with no servers involved.</p>
               <div class="actions">
-                <a class="btn btn-primary" href="/XDC_PQOnchain/">Open app</a>
-                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_PQOnchain" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
+                <a class="btn btn-primary" href="/XDC_PQOnchain/" data-goatcounter-click="open/XDC_PQOnchain">Open app</a>
+                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_PQOnchain" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_PQOnchain"><svg aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
               </div>
             </li>
             <li class="tool">
@@ -499,7 +500,7 @@
               <p class="desc">Prepare transactions for an offline wallet and broadcast them once signed. Enter your address to get the transaction details, scan a QR code, or paste a signed transaction to send it to the network.</p>
               <p class="detail">Works in a desktop or mobile browser.</p>
               <div class="actions">
-                <a class="btn btn-primary" href="/XDC_Send_Offline_Helper/">Open app</a>
+                <a class="btn btn-primary" href="/XDC_Send_Offline_Helper/" data-goatcounter-click="open/XDC_Send_Offline_Helper">Open app</a>
               </div>
             </li>
             <li class="tool">
@@ -507,7 +508,7 @@
               <p class="desc">Turn an XDC payment into a PDF receipt. Enter the transaction hash, a description and optional sender and receiver details to download a verifiable proof for accounting or trade finance.</p>
               <p class="detail">Add your own branding to each receipt.</p>
               <div class="actions">
-                <a class="btn btn-primary" href="/XDC_Proof/">Create a receipt</a>
+                <a class="btn btn-primary" href="/XDC_Proof/" data-goatcounter-click="open/XDC_Proof">Create a receipt</a>
               </div>
             </li>
             <li class="tool">
@@ -515,8 +516,8 @@
               <p class="desc">A beginner-friendly Telegram shop that sells digital products for XDC and delivers them automatically. Made for hobbyists who want to try running an online shop without advanced coding.</p>
               <p class="detail">Free and open source. Try the demo before setting up your own.</p>
               <div class="actions">
-                <a class="btn btn-primary" href="https://t.me/xdcshopbot" target="_blank" rel="noopener">Try the demo bot</a>
-                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_ShopBot" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
+                <a class="btn btn-primary" href="https://t.me/xdcshopbot" target="_blank" rel="noopener" data-goatcounter-click="open/xdcshopbot-demo">Try the demo bot</a>
+                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_ShopBot" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_ShopBot"><svg aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
               </div>
             </li>
           </ul>
@@ -533,7 +534,7 @@
               <h4>XDC Library <span class="kind kind-repo">Reading list</span></h4>
               <p class="desc">A curated, organised collection of articles and resources about the XDC Network, to help you understand how it works and what you can build on it.</p>
               <div class="actions">
-                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDCLibrary" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-github"/></svg>Browse the library</a>
+                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDCLibrary" target="_blank" rel="noopener" data-goatcounter-click="github/XDCLibrary"><svg aria-hidden="true"><use href="#i-github"/></svg>Browse the library</a>
               </div>
             </li>
           </ul>
@@ -548,10 +549,10 @@
           <p>Questions about a tool, a bug to report, or an idea for something new? Message me on whichever platform suits you.</p>
         </div>
         <ul class="channels">
-          <li><a href="https://t.me/s4njk4n" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-telegram"/></svg><span class="name">Telegram</span><span class="handle">@s4njk4n</span></a></li>
-          <li><a href="https://discord.com/users/852434672793288724" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-discord"/></svg><span class="name">Discord</span><span class="handle">@s4njk4n</span></a></li>
-          <li><a href="https://x.com/s4njk4n" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-x"/></svg><span class="name">X</span><span class="handle">@s4njk4n</span></a></li>
-          <li><a href="https://github.com/s4njk4n" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-github"/></svg><span class="name">GitHub</span><span class="handle">s4njk4n</span></a></li>
+          <li><a href="https://t.me/s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="contact/telegram"><svg aria-hidden="true"><use href="#i-telegram"/></svg><span class="name">Telegram</span><span class="handle">@s4njk4n</span></a></li>
+          <li><a href="https://discord.com/users/852434672793288724" target="_blank" rel="noopener" data-goatcounter-click="contact/discord"><svg aria-hidden="true"><use href="#i-discord"/></svg><span class="name">Discord</span><span class="handle">@s4njk4n</span></a></li>
+          <li><a href="https://x.com/s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="contact/x"><svg aria-hidden="true"><use href="#i-x"/></svg><span class="name">X</span><span class="handle">@s4njk4n</span></a></li>
+          <li><a href="https://github.com/s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="github/profile"><svg aria-hidden="true"><use href="#i-github"/></svg><span class="name">GitHub</span><span class="handle">s4njk4n</span></a></li>
         </ul>
       </div>
     </section>
@@ -559,7 +560,7 @@
 
   <footer class="site-footer">
     <div class="wrap">
-      <p>© <span id="year">2026</span> XDC Outpost, by <a href="https://github.com/s4njk4n?tab=repositories" target="_blank" rel="noopener">s4njk4n</a></p>
+      <p>© <span id="year">2026</span> XDC Outpost, by <a href="https://github.com/s4njk4n?tab=repositories" target="_blank" rel="noopener" data-goatcounter-click="github/profile">s4njk4n</a></p>
       <p><a href="#top">Back to top</a></p>
     </div>
   </footer>
