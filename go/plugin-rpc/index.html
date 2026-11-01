@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plugin XDC RPC plans · XDC Outpost</title>
+  <meta name="robots" content="noindex">
+  <meta http-equiv="refresh" content="4;url=https://rpc.plugin.global/?utm_source=xdcoutpost&amp;utm_medium=referral">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <style>
+    @font-face { font-family: "Instrument Sans"; src: url("/assets/fonts/instrument-sans.woff2") format("woff2-variations"); font-weight: 400 700; }
+    :root { --night: #1E1A4A; --ink: #F2EDFF; --mist: #C3B8EA; --signal: #8FDCFF; }
+    html, body { height: 100%; margin: 0; }
+    body { display: grid; place-items: center; background: var(--night); color: var(--ink); font: 1.05rem/1.55 "Instrument Sans", "Helvetica Neue", "Segoe UI", sans-serif; padding: 1.5rem; text-align: center; }
+    p { margin: 0 0 .6rem; color: var(--mist); }
+    a { color: var(--signal); font-weight: 600; }
+    a:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; border-radius: 4px; }
+  </style>
+  <script src="/assets/analytics.js"></script>
+</head>
+<body>
+  <main>
+    <p>Taking you to Plugin’s XDC RPC plans…</p>
+    <a id="go" href="https://rpc.plugin.global/?utm_source=xdcoutpost&amp;utm_medium=referral">Continue to rpc.plugin.global</a>
+  </main>
+  <script>
+    // Counts the referral in GoatCounter (as "referral/plugin-rpc/<from>"), then forwards.
+    (function () {
+      var from = (new URLSearchParams(location.search).get('from') || 'direct').replace(/[^a-z0-9-]/gi, '').slice(0, 40) || 'direct';
+      var dest = 'https://rpc.plugin.global/?utm_source=xdcoutpost&utm_medium=referral&utm_campaign=' + encodeURIComponent(from);
+      document.getElementById('go').href = dest;
+      var gone = false, tries = 0;
+      function go() { if (!gone) { gone = true; location.replace(dest); } }
+      var t = setInterval(function () {
+        if (window.goatcounter && typeof window.goatcounter.count === 'function') {
+          clearInterval(t);
+          try { window.goatcounter.count({ path: 'referral/plugin-rpc/' + from, title: 'Plugin RPC referral (' + from + ')', event: true }); } catch (e) {}
+          setTimeout(go, 400);
+        } else if (++tries > 15) { clearInterval(t); go(); }   // analytics blocked or not loaded: go anyway
+      }, 100);
+    })();
+  </script>
+</body>
+</html>
