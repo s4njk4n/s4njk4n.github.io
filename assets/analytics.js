@@ -8,7 +8,7 @@
  * Only visits to the live site (xdcoutpost.xyz) are counted, not local testing.
  */
 (function () {
-  var GOATCOUNTER_CODE = 'REPLACE_ME';
+  var GOATCOUNTER_CODE = 'xdcoutpost';
 
   // Count a named action, e.g. xdcTrack('calculator/calculated'). Safe to call any time.
   window.xdcTrack = function (name, title) {
