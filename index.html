@@ -24,7 +24,7 @@
       { "@type": "WebSite", "name": "XDC Outpost", "url": "https://xdcoutpost.xyz/",
         "author": { "@id": "#s4njk4n" } },
       { "@type": "Person", "@id": "#s4njk4n", "name": "s4njk4n",
-        "sameAs": ["https://github.com/s4njk4n", "https://x.com/s4njk4n", "https://t.me/s4njk4n"] },
+        "sameAs": ["https://github.com/s4njk4n", "https://x.com/s4njk4n", "https://t.me/s4njk4n", "https://www.xdc.dev/s4njk4n", "https://medium.com/@s4njk4n"] },
       { "@type": "SoftwareApplication", "name": "XDC PQOnchain",
         "applicationCategory": "SecurityApplication", "operatingSystem": "Web browser",
         "url": "https://xdcoutpost.xyz/XDC_PQOnchain/",
@@ -333,6 +333,25 @@
     .channels .name { font-weight: 600; min-width: 5.5rem; }
     .channels .handle { color: var(--mist); }
 
+    /* ---------- About ---------- */
+    .about { padding: clamp(4rem, 8vw, 6rem) 0 0; }
+    .about .wrap { display: grid; gap: 2rem 4rem; }
+    @media (min-width: 900px) { .about .wrap { grid-template-columns: 1fr 1fr; align-items: start; } }
+    .about h2 {
+      font-family: var(--display); font-weight: 700; font-stretch: 90%;
+      font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -0.02em; line-height: 1.1; margin: 0 0 1rem;
+    }
+    .about p { color: var(--mist); margin: 0 0 1rem; max-width: 30em; }
+    .about p:last-child { margin-bottom: 0; }
+    .about a { color: var(--ink); }
+    .about a:hover { color: var(--signal); }
+    .principles { list-style: none; margin: 0 0 2.5rem; padding: 0; border-top: 1px solid var(--line); }
+    .principles li { padding: 1rem 0.25rem; border-bottom: 1px solid var(--line); color: var(--mist); }
+    .principles strong { display: block; color: var(--ink); font-weight: 600; margin-bottom: 0.2rem; }
+    .about h3 { font-family: var(--display); font-weight: 700; font-size: 1.25rem; margin: 0 0 0.5rem; color: var(--ink); }
+    .services { margin: 0.75rem 0 1rem; padding-left: 1.2rem; color: var(--mist); }
+    .services li { margin: 0.3rem 0; }
+
     /* ---------- Footer ---------- */
     .site-footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--mist); font-size: 0.9rem; }
     .site-footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; }
@@ -365,6 +384,7 @@
       <nav class="site-nav" aria-label="Main">
         <a href="#pq">Post-quantum</a>
         <a href="#tools">Tools</a>
+        <a class="wide" href="#about">About</a>
         <a class="wide" href="#contact">Contact</a>
         <a class="wide" href="https://github.com/s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="github/profile">GitHub</a>
       </nav>
@@ -572,6 +592,33 @@
               </div>
             </li>
           </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="about" id="about" aria-labelledby="about-title">
+      <div class="wrap">
+        <div>
+          <h2 id="about-title">About XDC Outpost</h2>
+          <p>XDC Outpost is run by s4njk4n, part of the XDC community since July 2017. Since 2021 I’ve been contributing on the technical side: tutorials and technical documentation for node operators and masternode owners, and the tools on this site.</p>
+          <p>You can read my guides on <a href="https://www.xdc.dev/s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="about/xdc-dev">xdc.dev</a> and <a href="https://medium.com/@s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="about/medium">Medium</a>, many of them collected in the <a href="#learn">XDC Library</a>, and in earlier contributions to the XDC community documentation.</p>
+          <p>Most of the tools started with a gap I noticed: something people kept asking for, or a job that was harder than it needed to be. I build the fix, tidy it up and share it here.</p>
+        </div>
+        <div>
+          <ul class="principles">
+            <li><strong>Free and open source</strong>Every tool is MIT licensed, and you can read the code before you use it.</li>
+            <li><strong>Your keys stay yours</strong>Web apps run entirely in your browser. Self-hosted tools run on your own server or GitHub account.</li>
+            <li><strong>No accounts, no cookies</strong>This site counts visits with GoatCounter, which doesn’t use cookies or collect personal data.</li>
+          </ul>
+          <h3>Need a hand?</h3>
+          <p>The tools are free and always will be. If you’d rather not set them up yourself, or you need something built for your own project or business, I can help with:</p>
+          <ul class="services">
+            <li>node monitoring and alerts</li>
+            <li>node hardening and private RPC setup</li>
+            <li>custom or white-label versions of these tools</li>
+            <li>new XDC tools built to order</li>
+          </ul>
+          <p><a href="#contact">Get in touch</a> on whichever platform suits you.</p>
         </div>
       </div>
     </section>
