@@ -1,0 +1,199 @@
+/*
+ * XDC Outpost shared theme
+ * ------------------------------------------------------------
+ * Loaded by every tool page *after* its own <style> block, so these
+ * rules re-skin the shared components (header, hero, panels, forms,
+ * buttons, notices, contact, footer) to match the home page without
+ * touching any page's markup or scripts.
+ *
+ * Change a token here and every tool page follows.
+ */
+
+:root {
+  --night:  #0B0D1A;   /* page */
+  --deep:   #090B16;   /* bands / sections */
+  --dusk:   #151931;   /* raised surfaces */
+  --raised: #1C2140;   /* hover */
+  --line:   #262C4A;
+  --line-2: #363D63;
+  --ink:    #EEF0FA;
+  --mist:   #9EA4BF;
+  --faint:  #6E7594;
+  --signal: #6FDFFF;
+  --flare:  #FF8FB4;
+  --ok:     #7EEBC0;
+  --mint:   #7EEBC0;
+  --amber:  #FFD38A;
+  --wrap:   76rem;
+  --r-lg: 22px;
+  --r-md: 14px;
+  --r-sm: 10px;
+  color-scheme: dark;
+}
+
+html { scroll-padding-top: 6rem; }
+body { background: var(--night); color: var(--ink); text-rendering: optimizeLegibility; }
+::selection { background: var(--signal); color: var(--night); }
+a { text-decoration-thickness: 1px; text-underline-offset: 0.22em; }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; border-radius: 6px; }
+
+/* ---------- Header: the same floating glass bar as the home page ---------- */
+.site-header {
+  position: sticky; top: 0; z-index: 30;
+  background: none; border: 0;
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+  padding: 0.75rem var(--gutter) 0;
+  pointer-events: none;
+}
+.site-header.scrolled { border: 0; }
+.site-header > .wrap {
+  pointer-events: auto;
+  max-width: calc(var(--wrap) - 2 * var(--gutter) + 1.5rem);
+  height: 3.5rem; padding: 0 0.6rem 0 1rem;
+  border-radius: 999px; border: 1px solid transparent;
+  transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+.site-header.scrolled > .wrap {
+  background: rgb(19 22 43 / 0.72);
+  border-color: rgb(170 180 230 / 0.11);
+  box-shadow: 0 10px 40px -12px rgb(0 0 0 / 0.6);
+  backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4);
+}
+.brand { font-size: 1.15rem; }
+.brand svg { width: 1.55rem; height: 1.55rem; }
+.crumbs .sep { color: var(--line-2); }
+.crumbs .here, .brand .sub { color: var(--mist); }
+.site-nav { gap: 0.25rem; }
+.site-nav a {
+  padding: 0.55rem 0.8rem; border-radius: 999px; border-bottom: 0;
+  transition: color 0.15s, background-color 0.15s;
+}
+.site-nav a:hover { color: var(--ink); background: rgb(255 255 255 / 0.05); }
+.site-nav a[aria-current="page"] { color: var(--ink); background: rgb(255 255 255 / 0.07); }
+@media (max-width: 420px) { .site-nav a { padding: 0.55rem 0.55rem; } }
+
+/* ---------- Hero: lattice behind, condensed display type ---------- */
+.hero { position: relative; isolation: isolate; overflow-x: clip; }
+.outpost-lattice {
+  position: absolute; inset: -5rem 0 0; z-index: -1;
+  width: 100%; height: calc(100% + 5rem); pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 85% 80% at 65% 35%, #000 25%, transparent 80%);
+          mask-image: radial-gradient(ellipse 85% 80% at 65% 35%, #000 25%, transparent 80%);
+}
+.hero::before {
+  content: ""; position: absolute; z-index: -1; pointer-events: none;
+  width: 46rem; height: 46rem; right: -16rem; top: -26rem;
+  background: radial-gradient(closest-side, rgb(111 223 255 / 0.09), transparent 70%);
+}
+.hero h1 {
+  font-weight: 780; font-stretch: 75%;
+  letter-spacing: -0.035em; line-height: 0.92;
+}
+.hero .lede { color: var(--mist); text-shadow: 0 0 18px var(--night), 0 0 6px var(--night); }
+
+/* Fact tags: quiet, one style */
+.kind {
+  border-radius: 7px; font-size: 0.78rem;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  border: 1px solid color-mix(in srgb, currentColor 32%, transparent);
+}
+.kind-pq { color: var(--flare); background: color-mix(in srgb, var(--flare) 10%, transparent); border-color: color-mix(in srgb, var(--flare) 35%, transparent); }
+
+/* The hero side card gets the home page's glass console treatment */
+.hero .panel {
+  border-radius: var(--r-lg);
+  background:
+    linear-gradient(180deg, rgb(26 30 56 / 0.78), rgb(14 16 32 / 0.88)) padding-box,
+    linear-gradient(140deg, rgb(111 223 255 / 0.6), rgb(150 165 230 / 0.12) 40%, rgb(255 143 180 / 0.55)) border-box;
+  border: 1px solid transparent;
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 40px 100px -30px rgb(0 0 0 / 0.75), 0 0 80px -30px rgb(111 223 255 / 0.22);
+}
+.panel { border-radius: var(--r-md); }
+
+/* PQ payload bar: slim glowing segments, as on the home page */
+.payload-bar { height: 0.5rem; gap: 3px; border-radius: 999px; font-size: 0; }
+.payload-bar span { border-radius: 999px; padding: 0 !important; }
+.seg-kem { background: var(--signal); box-shadow: 0 0 14px rgb(111 223 255 / 0.5); }
+.seg-iv  { background: #CDBFFF; flex: 0.5; }
+.seg-msg { background: var(--flare); box-shadow: 0 0 14px rgb(255 143 180 / 0.45); }
+
+/* ---------- Sections ---------- */
+.steps, .band { background: var(--deep); }
+.group { border-top-color: var(--line); }
+.step-no { border-color: rgb(111 223 255 / 0.55); box-shadow: 0 0 18px -4px rgb(111 223 255 / 0.5); }
+.group-head h2 { font-stretch: 85%; letter-spacing: -0.02em; }
+.know h2, .contact h2 { font-weight: 760; font-stretch: 80%; letter-spacing: -0.03em; line-height: 0.98; }
+.contact { border-top-color: var(--line); }
+
+/* ---------- Forms ---------- */
+input, textarea, select, input[type="search"] {
+  background: rgb(6 7 16 / 0.65);
+  border-color: var(--line-2);
+  border-radius: var(--r-sm);
+}
+input:hover, textarea:hover, select:hover { border-color: #46507A; }
+input:focus, textarea:focus, select:focus, input[type="search"]:focus {
+  outline: none; border-color: var(--signal);
+  box-shadow: 0 0 0 4px rgb(111 223 255 / 0.12), 0 0 30px -10px rgb(111 223 255 / 0.5);
+}
+input::placeholder, textarea::placeholder { color: var(--faint); }
+details.settings, details.more { border-radius: var(--r-sm); border-color: var(--line-2); }
+
+/* ---------- Buttons (match home page) ---------- */
+.btn { border-radius: var(--r-sm); transition: background-color 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.2s; }
+.btn-primary:hover { box-shadow: 0 0 28px -6px rgb(111 223 255 / 0.7); }
+.btn-ghost { border-color: var(--line-2); }
+.btn-ghost:hover { border-color: var(--signal); background: rgb(111 223 255 / 0.05); }
+
+/* Chips / segmented controls: active = solid ink, like the home page filters */
+.chip { background: transparent; border-color: var(--line-2); }
+.chip:hover { border-color: var(--mist); }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--night); }
+.chip[aria-pressed="true"] .n { color: var(--night); }
+
+/* ---------- Output boxes, notices, wallet strip ---------- */
+.box { background: rgb(6 7 16 / 0.65); border-color: var(--line); border-radius: var(--r-sm); }
+.notice { border-radius: var(--r-sm); background: var(--dusk); border-color: var(--line-2); }
+.notice[data-tone="error"] { border-color: var(--flare); background: rgb(255 143 180 / 0.07); }
+.notice[data-tone="ok"] { border-color: var(--ok); background: rgb(126 235 192 / 0.06); }
+.wallet, .sent-log li { border-radius: var(--r-sm); border-color: var(--line-2); }
+.wallet-state.on .dot { box-shadow: 0 0 0 4px rgb(126 235 192 / 0.18), 0 0 12px var(--ok); }
+
+/* ---------- Contact + footer ---------- */
+.channels a { transition: color 0.15s; }
+.site-footer { border-top-color: var(--line); }
+
+/* ---------- Atlas ---------- */
+.ptabs {
+  top: 4.25rem; background: rgb(11 13 26 / 0.82);
+  backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border-bottom-color: var(--line);
+}
+.ptab { border-radius: var(--r-md); background: rgb(255 255 255 / 0.02); border-color: var(--line-2); }
+.ptab:hover { border-color: var(--mist); background: rgb(255 255 255 / 0.04); }
+.ptab[aria-current="page"] { background: var(--ink); border-color: var(--ink); color: var(--night); }
+.card {
+  border-radius: var(--r-md);
+  background: linear-gradient(180deg, rgb(26 30 56 / 0.55), rgb(19 22 43 / 0.35));
+  border-color: var(--line);
+}
+.card:hover { border-color: var(--line-2); background: linear-gradient(180deg, rgb(30 35 64 / 0.7), rgb(19 22 43 / 0.5)); }
+.logo { border-radius: 10px; }
+.tablewrap { border-radius: var(--r-md); background: rgb(19 22 43 / 0.5); }
+
+/* ---------- FuelSharp ---------- */
+.seg { border-color: var(--line-2); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--night); }
+.summary, .layout .panel { border-radius: var(--r-md); }
+.row { border-radius: var(--r-sm); }
+
+/* ---------- Load sequence: one quiet rise for the hero, as on the home page ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .outpost-js .hero h1, .outpost-js .hero .lede, .outpost-js .hero .panel {
+    animation: outpost-rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .outpost-js .hero .lede { animation-delay: 0.08s; }
+  .outpost-js .hero .panel { animation-delay: 0.16s; }
+}
+@keyframes outpost-rise { from { opacity: 0; transform: translateY(12px); } }

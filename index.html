@@ -2,11 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>XDC Outpost: post-quantum messaging and practical tools for the XDC Network</title>
   <meta name="description" content="Post-quantum encrypted messaging on XDC mainnet (ML-KEM-768, NIST FIPS 203), plus open-source tools for XDC node operators, masternode owners and everyday users.">
   <link rel="canonical" href="https://xdcoutpost.xyz/">
-  <meta name="theme-color" content="#1E1A4A">
+  <meta name="theme-color" content="#0B0D1A">
+  <meta name="color-scheme" content="dark">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 
   <meta property="og:type" content="website">
@@ -42,321 +43,540 @@
     @font-face {
       font-family: "Bricolage";
       src: url("assets/fonts/bricolage.woff2") format("woff2-variations");
-      font-weight: 200 800;
-      font-stretch: 75% 100%;
-      font-display: swap;
+      font-weight: 200 800; font-stretch: 75% 100%; font-display: swap;
     }
     @font-face {
       font-family: "Instrument Sans";
       src: url("assets/fonts/instrument-sans.woff2") format("woff2-variations");
-      font-weight: 400 700;
-      font-stretch: 75% 100%;
-      font-display: swap;
+      font-weight: 400 700; font-stretch: 75% 100%; font-display: swap;
     }
 
+    /* ======================================================
+       Tokens
+       ====================================================== */
     :root {
-      --night: #1E1A4A;
-      --dusk: #2B2566;
-      --line: #443D84;
-      --ink: #F2EDFF;
-      --mist: #C3B8EA;
-      --signal: #8FDCFF;
-      --flare: #FF9EBB;
+      --void:   #0B0D1A;   /* page: midnight blue */
+      --deep:   #13162B;   /* raised surfaces */
+      --deep-2: #1A1E38;   /* hover / inset */
+      --line:   rgb(170 180 230 / 0.11);
+      --line-2: rgb(170 180 230 / 0.24);
+      --ink:    #EEF0FA;
+      --mist:   #9EA4BF;
+      --signal: #6FDFFF;   /* cyan: links, live data, primary actions */
+      --flare:  #FF8FB4;   /* beacon pink: post-quantum, the outpost lamp */
+      --mint:   #7EEBC0;   /* "live" status */
 
       --display: "Bricolage", "Avenir Next", "Segoe UI", sans-serif;
       --body: "Instrument Sans", "Helvetica Neue", "Segoe UI", sans-serif;
+      --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
 
-      --wrap: 72rem;
+      --wrap: 76rem;
       --gutter: clamp(1.25rem, 4vw, 2.5rem);
+      --r-lg: 22px;
+      --r-md: 14px;
+      --r-sm: 9px;
+      --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
     }
 
     *, *::before, *::after { box-sizing: border-box; }
-    html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
+    html { scroll-behavior: smooth; scroll-padding-top: 6rem; }
     @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
     body {
       margin: 0;
-      background: var(--night);
+      background: var(--void);
       color: var(--ink);
       font-family: var(--body);
       font-size: 1.0625rem;
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
+    ::selection { background: var(--signal); color: var(--void); }
 
-    a { color: var(--signal); text-underline-offset: 0.2em; }
+    a { color: var(--signal); text-underline-offset: 0.22em; text-decoration-thickness: 1px; }
     a:hover { color: var(--ink); }
-    :focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; border-radius: 4px; }
+    :focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; border-radius: 6px; }
+    button { font: inherit; color: inherit; }
 
     .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 var(--gutter); }
+    .nb { white-space: nowrap; }
+    .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
     .skip {
-      position: absolute; left: 1rem; top: -3rem;
-      background: var(--signal); color: var(--night);
-      padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; z-index: 20;
+      position: absolute; left: 1rem; top: -3rem; z-index: 50;
+      background: var(--signal); color: var(--void);
+      padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600;
     }
     .skip:focus { top: 1rem; }
 
-    /* ---------- Header ---------- */
+    /* ======================================================
+       Header: floating glass bar
+       ====================================================== */
     .site-header {
-      position: sticky; top: 0; z-index: 10;
-      background: rgb(30 26 74 / 0.85);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-bottom: 1px solid transparent;
-      transition: border-color 0.2s;
+      position: fixed; inset: 0 0 auto; z-index: 30;
+      padding: 0.75rem var(--gutter) 0;
+      pointer-events: none;
     }
-    .site-header.scrolled { border-bottom-color: var(--line); }
-    .site-header .wrap {
-      display: flex; align-items: center; justify-content: space-between;
-      height: 4rem; gap: 1rem;
+    .bar {
+      pointer-events: auto;
+      max-width: calc(var(--wrap) - 2 * var(--gutter) + 1.5rem);
+      margin: 0 auto;
+      display: flex; align-items: center; gap: 1rem;
+      height: 3.5rem; padding: 0 0.6rem 0 1rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+    }
+    .scrolled .bar {
+      background: rgb(19 22 43 / 0.72);
+      border-color: var(--line);
+      box-shadow: 0 10px 40px -12px rgb(0 0 0 / 0.6);
+      backdrop-filter: blur(16px) saturate(1.4);
+      -webkit-backdrop-filter: blur(16px) saturate(1.4);
     }
     .brand {
       display: flex; align-items: center; gap: 0.6rem;
-      color: var(--ink); text-decoration: none;
-      font-family: var(--display); font-weight: 700; font-size: 1.2rem;
-      letter-spacing: -0.01em;
+      color: var(--ink); text-decoration: none; white-space: nowrap;
+      font-family: var(--display); font-weight: 700; font-size: 1.15rem; letter-spacing: -0.01em;
     }
-    .brand svg { width: 1.6rem; height: 1.6rem; flex: none; }
-    .site-nav { display: flex; gap: clamp(1rem, 3vw, 2rem); }
+    .brand svg { width: 1.55rem; height: 1.55rem; flex: none; }
+    .site-nav { display: flex; gap: 0.25rem; margin-left: auto; }
     .site-nav a {
-      color: var(--mist); text-decoration: none; font-size: 0.95rem; font-weight: 500;
+      color: var(--mist); text-decoration: none; font-size: 0.94rem; font-weight: 500;
+      padding: 0.55rem 0.8rem; border-radius: 999px; white-space: nowrap;
+      transition: color 0.15s, background-color 0.15s;
     }
-    .site-nav a:hover { color: var(--ink); }
-    .brand { white-space: nowrap; }
-    @media (max-width: 640px) { .site-nav .wide { display: none; } }
-    .nb { white-space: nowrap; }
-    .site-nav a { white-space: nowrap; padding: 0.75rem 0; }
+    .site-nav a:hover { color: var(--ink); background: rgb(255 255 255 / 0.05); }
+    .find-btn {
+      display: inline-flex; align-items: center; gap: 0.55rem;
+      height: 2.4rem; padding: 0 0.7rem 0 0.85rem;
+      border-radius: 999px; border: 1px solid var(--line-2);
+      background: rgb(255 255 255 / 0.03); color: var(--mist);
+      cursor: pointer; font-size: 0.9rem; white-space: nowrap;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .find-btn:hover { border-color: var(--signal); color: var(--ink); }
+    .find-btn svg { width: 1rem; height: 1rem; stroke: currentColor; fill: none; stroke-width: 2; }
+    kbd {
+      font-family: var(--mono); font-size: 0.72rem; line-height: 1;
+      padding: 0.25rem 0.4rem; border-radius: 5px;
+      border: 1px solid var(--line-2); color: var(--mist); background: rgb(255 255 255 / 0.04);
+    }
+    @media (max-width: 900px) { .site-nav .wide { display: none; } }
+    @media (max-width: 560px) {
+      .find-btn .label, .find-btn kbd { display: none; }
+      .find-btn { width: 2.4rem; padding: 0; justify-content: center; }
+      .site-nav a { padding: 0.55rem 0.6rem; }
+      .bar { gap: 0.5rem; }
+    }
     @media (max-width: 380px) {
-      .brand { font-size: 1.05rem; gap: 0.45rem; }
-      .brand svg { width: 1.35rem; height: 1.35rem; }
-      .site-nav { gap: 0.9rem; }
-      .site-nav a { font-size: 0.875rem; }
+      .brand { font-size: 1.02rem; gap: 0.45rem; }
+      .brand svg { width: 1.3rem; height: 1.3rem; }
     }
-    .site-footer a { display: inline-block; padding: 0.6rem 0; }
 
-    /* ---------- Hero ---------- */
-    .hero { position: relative; padding: clamp(4rem, 10vw, 7.5rem) 0 0; overflow: hidden; }
+    /* ======================================================
+       Hero: lattice field + console
+       ====================================================== */
+    .hero {
+      position: relative; isolation: isolate; overflow: hidden;
+      padding: clamp(7.5rem, 14vw, 10rem) 0 0;
+      min-height: min(100svh, 62rem);
+      display: flex; flex-direction: column;
+    }
+    #lattice {
+      position: absolute; inset: 0; z-index: -1;
+      width: 100%; height: 100%;
+      -webkit-mask-image: radial-gradient(ellipse 90% 75% at 60% 40%, #000 30%, transparent 85%);
+              mask-image: radial-gradient(ellipse 90% 75% at 60% 40%, #000 30%, transparent 85%);
+    }
+    .hero::before {             /* ambient glow behind the console */
+      content: ""; position: absolute; z-index: -1;
+      width: 60rem; height: 60rem; right: -20rem; top: -18rem;
+      background: radial-gradient(closest-side, rgb(127 227 255 / 0.10), transparent 70%);
+      pointer-events: none;
+    }
+    .hero-grid {
+      display: grid; gap: 2.75rem 4rem;
+      grid-template-areas: "title" "lede" "find" "feature" "routes";
+      flex: 1;
+    }
+    .hero h1 { grid-area: title; }
+    .hero .lede { grid-area: lede; }
+    .hero .finder { grid-area: find; }
+    .hero .feature { grid-area: feature; }
+    .hero .routes { grid-area: routes; }
+    @media (min-width: 1060px) {
+      .hero-grid {
+        grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+        grid-template-areas: "title feature" "lede feature" "find feature" "routes feature";
+        grid-template-rows: auto auto auto 1fr;
+        column-gap: 4.5rem;
+      }
+    }
+
     .hero h1 {
       font-family: var(--display);
-      font-weight: 750;
-      font-stretch: 82%;
-      font-size: clamp(2.75rem, 8.5vw, 6.25rem);
-      line-height: 0.95;
-      letter-spacing: -0.028em;
-      margin: 0 0 1.75rem;
-      max-width: 11ch;
-      text-wrap: balance;
+      font-weight: 780; font-stretch: 75%;
+      font-size: clamp(3rem, 9.5vw, 7.25rem);
+      line-height: 0.88; letter-spacing: -0.035em;
+      margin: 0; max-width: 10ch; text-wrap: balance;
     }
-    .hero .lede {
-      font-size: clamp(1.125rem, 2vw, 1.3rem);
-      color: var(--mist);
-      max-width: 34em;
-      margin: 0 0 2.5rem;
+    .hero h1 .line { display: block; }
+    .hero h1 .ghost {
+      /* fill with the page colour and paint the stroke underneath,
+         so overlapping glyph contours in the variable font stay hidden */
+      color: var(--void);
+      -webkit-text-stroke: 3px rgb(238 240 250 / 0.6);
+      paint-order: stroke fill;
     }
-    .hero .lede a { color: var(--ink); }
+    @media (min-width: 1060px) { .hero h1 { font-size: clamp(4.25rem, 7vw, 7rem); } }
 
-    .routes { margin: 0; align-self: end; }
-    .routes p { margin: 0 0 0.75rem; font-weight: 600; color: var(--ink); }
-    .routes ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .lede {
+      font-size: clamp(1.1rem, 1.8vw, 1.28rem); line-height: 1.55;
+      color: var(--mist); max-width: 33em; margin: 0;
+    }
+    .lede a { color: var(--ink); }
+    .lede, .routes p { text-shadow: 0 0 18px var(--void), 0 0 6px var(--void); }
+
+    /* Command-style finder (opens the palette) */
+    .finder {
+      display: flex; align-items: center; gap: 0.85rem;
+      width: 100%; max-width: 32rem; height: 3.6rem;
+      padding: 0 0.75rem 0 1.15rem;
+      border-radius: var(--r-md);
+      border: 1px solid var(--line-2);
+      background: rgb(19 22 43 / 0.65);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      color: var(--mist); text-align: left; cursor: text;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .finder:hover, .finder:focus-visible {
+      border-color: var(--signal);
+      box-shadow: 0 0 0 4px rgb(127 227 255 / 0.10), 0 0 40px -8px rgb(127 227 255 / 0.35);
+      outline: none;
+    }
+    .finder svg { width: 1.15rem; height: 1.15rem; stroke: var(--signal); fill: none; stroke-width: 2; flex: none; }
+    .finder .ph { flex: 1; font-size: 1.02rem; }
+    .finder .caret { display: inline-block; width: 2px; height: 1.15em; background: var(--signal); vertical-align: -0.2em; margin-left: 2px; animation: blink 1.1s steps(1) infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .routes p { margin: 0 0 0.8rem; font-weight: 600; color: var(--ink); font-size: 0.98rem; }
+    .routes ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.55rem; }
     .routes a {
-      display: inline-flex; align-items: center; gap: 0.6rem;
-      padding: 0.8rem 1.25rem;
-      border-radius: 999px;
+      display: inline-flex; align-items: center; gap: 0.55rem;
+      padding: 0.62rem 1rem; border-radius: 999px;
       border: 1px solid var(--line);
-      background: var(--dusk);
-      color: var(--ink); text-decoration: none; font-weight: 500;
+      background: rgb(255 255 255 / 0.025);
+      color: var(--ink); text-decoration: none; font-weight: 500; font-size: 0.95rem;
       transition: border-color 0.15s, background-color 0.15s;
     }
-    .routes a:hover { border-color: var(--signal); background: #332C75; }
-    .routes svg { width: 1.1rem; height: 1.1rem; stroke: var(--signal); fill: none; stroke-width: 1.75; flex: none; }
+    .routes a:hover { border-color: var(--signal); background: rgb(127 227 255 / 0.06); }
+    .routes svg { width: 1.05rem; height: 1.05rem; stroke: var(--signal); fill: none; stroke-width: 1.75; flex: none; }
 
-    .hero-grid { display: grid; gap: 2.5rem 4rem; grid-template-areas: "title" "lede" "feature" "routes"; }
-    .hero-grid h1 { grid-area: title; }
-    .hero-grid .lede { grid-area: lede; }
-    .hero-grid .feature { grid-area: feature; }
-    .hero-grid .routes { grid-area: routes; }
-    .hero-grid h1, .hero-grid .lede { margin-bottom: 0; }
-    @media (min-width: 1024px) {
-      .hero-grid {
-        grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-        grid-template-areas: "title feature" "lede feature" "routes feature";
-        grid-template-rows: auto auto 1fr;
-      }
-      .hero h1 { font-size: clamp(3.5rem, 6.2vw, 5.5rem); }
-    }
-
-    /* Featured: PQOnchain */
+    /* ---------- Console card (PQOnchain) ---------- */
     .feature {
-      background: var(--dusk);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: clamp(1.5rem, 3vw, 2.25rem);
-      align-self: start;
+      position: relative; align-self: start;
+      border-radius: var(--r-lg);
+      padding: clamp(1.5rem, 3vw, 2.1rem);
+      background:
+        linear-gradient(180deg, rgb(26 30 56 / 0.78), rgb(14 16 32 / 0.86)) padding-box,
+        linear-gradient(140deg, rgb(127 227 255 / 0.65), rgb(150 165 230 / 0.12) 40%, rgb(255 143 180 / 0.6)) border-box;
+      border: 1px solid transparent;
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 40px 100px -30px rgb(0 0 0 / 0.75), 0 0 80px -30px rgb(127 227 255 / 0.25);
     }
-    .feature-flag {
+    .flag {
       display: inline-flex; align-items: center; gap: 0.55rem;
-      margin: 0 0 1rem; font-size: 0.875rem; font-weight: 600; color: #B9F0D6;
+      margin: 0 0 1rem; font-size: 0.86rem; font-weight: 600; color: var(--mint);
     }
-    .feature-flag .live { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #6EE7B7; box-shadow: 0 0 0 4px rgb(110 231 183 / 0.18); }
+    .flag .live {
+      width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--mint);
+      box-shadow: 0 0 0 0 rgb(126 235 192 / 0.6);
+      animation: live 2.4s ease-out infinite;
+    }
+    @keyframes live { 0% { box-shadow: 0 0 0 0 rgb(126 235 192 / 0.55); } 70%,100% { box-shadow: 0 0 0 9px rgb(126 235 192 / 0); } }
     .feature h2 {
-      font-family: var(--display); font-weight: 720; font-stretch: 88%;
-      font-size: clamp(1.75rem, 3vw, 2.25rem); line-height: 1.05; letter-spacing: -0.02em;
-      margin: 0 0 1rem; text-wrap: balance;
+      font-family: var(--display); font-weight: 720; font-stretch: 85%;
+      font-size: clamp(1.7rem, 2.8vw, 2.2rem); line-height: 1.04; letter-spacing: -0.02em;
+      margin: 0 0 0.9rem; text-wrap: balance;
     }
-    .feature > p { margin: 0 0 1.25rem; color: var(--mist); font-size: 1rem; }
+    .feature > p { margin: 0 0 1.25rem; color: var(--mist); font-size: 0.99rem; }
     .feature > p strong { color: var(--ink); font-weight: 600; }
 
-    .payload { margin: 0 0 1.25rem; }
-    .payload-bar { display: flex; height: 2.75rem; border-radius: 8px; overflow: hidden; font-size: 0.8rem; font-weight: 600; }
-    .payload-bar span { display: flex; align-items: center; padding: 0 0.75rem; white-space: nowrap; overflow: hidden; }
-    .seg-kem { flex: 5.2; background: var(--signal); color: var(--night); }
-    .seg-iv  { flex: 0.9; background: #C9BCF5; color: var(--night); justify-content: center; padding: 0 0.25rem !important; }
-    .seg-msg { flex: 2.6; background: #FFC7D7; color: var(--night); }
-    .payload-key { display: grid; grid-template-columns: auto 1fr; gap: 0.2rem 0.75rem; margin: 0.75rem 0 0; font-size: 0.85rem; color: var(--mist); }
-    .payload-key dt { color: var(--ink); font-weight: 600; }
+    /* Live payload: plaintext → ciphertext */
+    .payload {
+      margin: 0 0 1.25rem; padding: 1rem;
+      border-radius: var(--r-md);
+      background: rgb(6 7 16 / 0.7);
+      border: 1px solid var(--line);
+    }
+    .payload-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: 0 0 0.75rem; }
+    .payload figcaption { font-size: 0.84rem; color: var(--mist); margin: 0; }
+    .replay {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: none; border: 1px solid var(--line-2); border-radius: 999px;
+      color: var(--mist); font-size: 0.78rem; padding: 0.3rem 0.7rem; cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .replay:hover { color: var(--ink); border-color: var(--signal); }
+    .replay svg { width: 0.85rem; height: 0.85rem; stroke: currentColor; fill: none; stroke-width: 2; }
+    .stream {
+      font-family: var(--mono); font-size: 0.74rem; line-height: 1.55;
+      height: calc(1.55em * 4); overflow: hidden;
+      word-break: break-all; margin: 0 0 0.85rem;
+      color: rgb(158 164 191 / 0.55);
+    }
+    .stream .k { color: var(--signal); }
+    .stream .v { color: #CDBFFF; }
+    .stream .m { color: var(--flare); }
+    .stream .pt { color: var(--ink); }
+    .payload-bar { display: flex; height: 0.5rem; border-radius: 999px; overflow: hidden; gap: 3px; }
+    .payload-bar span { display: block; border-radius: 999px; }
+    .seg-kem { flex: 5.2; background: var(--signal); box-shadow: 0 0 14px rgb(127 227 255 / 0.5); }
+    .seg-iv  { flex: 0.5; background: #CDBFFF; }
+    .seg-msg { flex: 2.6; background: var(--flare); box-shadow: 0 0 14px rgb(255 143 180 / 0.45); }
+    .payload-key { display: grid; grid-template-columns: auto 1fr; gap: 0.35rem 0.85rem; margin: 0.9rem 0 0; font-size: 0.84rem; color: var(--mist); }
+    .payload-key dt { display: flex; align-items: center; gap: 0.45rem; color: var(--ink); font-weight: 600; white-space: nowrap; }
+    .payload-key dt::before { content: ""; width: 0.55rem; height: 0.55rem; border-radius: 3px; background: var(--c); }
     .payload-key dd { margin: 0; }
-    .payload figcaption { font-size: 0.85rem; color: var(--mist); margin: 0 0 0.5rem; }
 
-    .feature .why { font-size: 0.925rem; border-left: 2px solid var(--flare); padding-left: 0.9rem; }
-    .feature .actions { margin-top: 0; }
+    .feature .why { font-size: 0.92rem; border-left: 2px solid var(--flare); padding-left: 0.9rem; }
 
-    .kind-pq { color: var(--night); background: var(--signal); border-color: var(--signal); }
-
-    /* The horizon: ridge line with the outpost and its beacon */
-    .horizon { display: block; width: 100%; height: auto; margin-top: clamp(2rem, 6vw, 4rem); }
-    .horizon .ridge { fill: none; stroke: var(--line); stroke-width: 1.5; }
-    .horizon .ground { fill: #19163F; }
+    /* ---------- Horizon ---------- */
+    .horizon { display: block; width: 100%; height: auto; margin-top: clamp(3rem, 7vw, 5rem); }
+    .horizon .ridge { fill: none; stroke: url(#ridgeGrad); stroke-width: 1.5; }
+    .horizon .ground { fill: #090B16; }
     .horizon .tower { fill: none; stroke: var(--mist); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
-    .horizon .lamp { fill: var(--flare); }
-    .horizon .ring { fill: none; stroke: var(--flare); stroke-width: 1.5; transform-box: fill-box; transform-origin: center; opacity: 0; }
-    .horizon .ring { animation: pulse 4.5s cubic-bezier(0.2, 0.6, 0.3, 1) infinite; }
+    .horizon .lamp { fill: var(--flare); filter: drop-shadow(0 0 8px var(--flare)); }
+    .horizon .ring { fill: none; stroke: var(--flare); stroke-width: 1.25; transform-box: fill-box; transform-origin: center; opacity: 0; animation: pulse 4.5s cubic-bezier(0.2, 0.6, 0.3, 1) infinite; }
     .horizon .ring:nth-of-type(2) { animation-delay: 1.5s; }
     .horizon .ring:nth-of-type(3) { animation-delay: 3s; }
-    @keyframes pulse {
-      0%   { transform: scale(0.2); opacity: 0.9; }
-      100% { transform: scale(1);   opacity: 0; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .horizon .ring { animation: none; opacity: 0.35; }
-      .horizon .ring:nth-of-type(2) { opacity: 0.2; }
-      .horizon .ring:nth-of-type(3) { opacity: 0.1; }
-    }
+    @keyframes pulse { 0% { transform: scale(0.15); opacity: 0.9; } 100% { transform: scale(1); opacity: 0; } }
 
-    /* ---------- Tool catalogue ---------- */
-    .catalogue { background: #19163F; padding: clamp(3rem, 7vw, 5rem) 0 clamp(4rem, 8vw, 6rem); }
-    .catalogue > .wrap > h2 {
-      font-family: var(--display); font-weight: 700; font-stretch: 90%;
-      font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -0.02em; line-height: 1.1;
-      margin: 0 0 0.5rem;
+    /* ======================================================
+       Tools: a calm, scannable index
+       Three fixed columns (name, what it does, action) so the eye
+       runs straight down the names, and the action is always in
+       the same place. One accent colour; no boxes per tool.
+       ====================================================== */
+    .catalogue { background: #090B16; padding: clamp(3rem, 7vw, 5rem) 0 clamp(4rem, 8vw, 6.5rem); position: relative; }
+    .cat-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1.5rem 3rem; margin: 0 0 3rem; }
+    .cat-head h2, .section-title {
+      font-family: var(--display); font-weight: 760; font-stretch: 80%;
+      font-size: clamp(2.4rem, 5vw, 3.6rem); letter-spacing: -0.03em; line-height: 0.95;
+      margin: 0 0 0.75rem;
     }
-    .catalogue > .wrap > p { color: var(--mist); margin: 0 0 3rem; max-width: 36em; }
+    .cat-head p { color: var(--mist); margin: 0; max-width: 34em; }
 
-    .group {
-      display: grid; gap: 1.5rem 3rem;
-      grid-template-columns: 1fr;
-      padding: 2.5rem 0;
-      border-top: 1px solid var(--line);
+    .filters {
+      display: flex; gap: 0.25rem; padding: 0.3rem;
+      border-radius: 999px; border: 1px solid var(--line);
+      overflow-x: auto; scrollbar-width: none; max-width: 100%;
     }
-    @media (min-width: 900px) {
-      .group { grid-template-columns: 17rem 1fr; }
-      .group-head { position: sticky; top: 6rem; align-self: start; }
+    .filters::-webkit-scrollbar { display: none; }
+    .filters button {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      border: 0; background: none; cursor: pointer; white-space: nowrap;
+      padding: 0.5rem 0.95rem; border-radius: 999px;
+      color: var(--mist); font-size: 0.92rem; font-weight: 500;
+      transition: color 0.15s, background-color 0.2s;
+    }
+    .filters button:hover { color: var(--ink); }
+    .filters button[aria-pressed="true"] { background: var(--ink); color: var(--void); }
+    .filters .n { font-size: 0.75rem; opacity: 0.6; font-variant-numeric: tabular-nums; }
+
+    .group { margin: 0 0 3.5rem; }
+    .group:last-child { margin-bottom: 0; }
+    .group[hidden] { display: none; }
+    .group-head {
+      display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 1.25rem;
+      padding: 0 0 1rem; border-bottom: 1px solid var(--line-2);
     }
     .group-head h3 {
-      font-family: var(--display); font-weight: 700; font-stretch: 90%;
-      font-size: 1.6rem; line-height: 1.15; letter-spacing: -0.015em; margin: 0 0 0.5rem;
+      font-family: var(--display); font-weight: 700; font-stretch: 88%;
+      font-size: 1.45rem; line-height: 1.15; letter-spacing: -0.015em; margin: 0;
     }
-    .group-head p { color: var(--mist); margin: 0; font-size: 0.975rem; }
+    .group-head p { color: var(--mist); margin: 0; font-size: 0.95rem; }
 
     .tools { list-style: none; margin: 0; padding: 0; }
     .tool {
-      display: grid; gap: 0.5rem 2rem;
+      position: relative;
+      display: grid; gap: 0.6rem 2.5rem;
       grid-template-columns: 1fr;
-      padding: 1.75rem 0;
-      border-bottom: 1px solid rgb(68 61 132 / 0.6);
+      padding: 1.6rem 0;
+      border-bottom: 1px solid var(--line);
     }
-    .tool:first-child { padding-top: 0; }
-    .tool:last-child { border-bottom: 0; padding-bottom: 0; }
-    @media (min-width: 640px) {
-      .tool { grid-template-columns: 1fr auto; }
-      .tool .actions { grid-column: 2; grid-row: 1 / span 3; align-self: start; justify-content: flex-end; }
+    @media (min-width: 720px) {
+      .tool { grid-template-columns: 13rem minmax(0, 1fr); }
+      .tool .actions { grid-column: 2; }
     }
+    @media (min-width: 1040px) {
+      .tool { grid-template-columns: 15rem minmax(0, 1fr) 12rem; padding: 1.75rem 0; }
+      .tool .actions { grid-column: 3; flex-direction: column; align-items: stretch; }
+    }
+    /* soft row highlight that bleeds past the column edges */
+    .tool::before {
+      content: ""; position: absolute; inset: 0 -1rem; z-index: -1;
+      border-radius: var(--r-md); background: rgb(255 255 255 / 0.025);
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .tool:hover::before { opacity: 1; }
+    .tools { position: relative; z-index: 0; }
+
     .tool h4 {
-      display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.75rem;
-      font-family: var(--display); font-weight: 650; font-size: 1.3rem; letter-spacing: -0.01em;
-      line-height: 1.25; margin: 0;
+      font-family: var(--display); font-weight: 680; font-size: 1.2rem; letter-spacing: -0.01em;
+      line-height: 1.25; margin: 0 0 0.3rem; text-wrap: balance;
     }
-    .tool .desc { margin: 0; max-width: 40em; }
-    .tool .detail { margin: 0; color: var(--mist); font-size: 0.95rem; max-width: 40em; }
+    .kind { margin: 0; font-size: 0.85rem; color: var(--mist); display: flex; align-items: center; gap: 0.45rem; }
+    .kind::before { content: ""; width: 0.4rem; height: 0.4rem; border-radius: 50%; background: currentColor; opacity: 0.8; flex: none; }
+    .kind-pq { color: var(--flare); }
+    .kind-soon::before { background: none; border: 1px solid currentColor; }
 
-    .kind {
-      font-family: var(--body); font-weight: 600; font-size: 0.75rem; letter-spacing: 0.01em;
-      padding: 0.15rem 0.6rem; border-radius: 999px;
-      border: 1px solid currentColor; white-space: nowrap;
+    .tool .desc { margin: 0; max-width: 38em; line-height: 1.6; }
+    .tool .detail { margin: 0.45rem 0 0; color: var(--mist); font-size: 0.92rem; max-width: 40em; }
+
+    /* PQOnchain: one quiet marker, not a different card */
+    .tool.flagship h4::after {
+      content: ""; display: inline-block; width: 0.45rem; height: 0.45rem; margin-left: 0.5rem;
+      border-radius: 50%; background: var(--flare); box-shadow: 0 0 10px var(--flare); vertical-align: 0.2em;
     }
-    .kind-web  { color: var(--signal); }
-    .kind-repo { color: var(--mist); }
-    .kind-bot  { color: #B9F0D6; }
-    .kind-soon { color: var(--flare); border-style: dashed; }
+    .tool.soon h4, .tool.soon .desc { color: var(--mist); }
 
-    .actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.5rem; }
+    /* Actions: one clear main action per tool, everything else secondary */
+    .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; }
     .btn {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      padding: 0.6rem 1.1rem; border-radius: 8px;
-      font-weight: 600; font-size: 0.95rem; text-decoration: none; white-space: nowrap;
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+      padding: 0.6rem 1.05rem; border-radius: var(--r-sm);
+      font-weight: 600; font-size: 0.93rem; text-decoration: none; white-space: nowrap;
+      transition: background-color 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.2s;
+    }
+    .btn-primary { background: var(--signal); color: var(--void); }
+    .btn-primary:hover { background: var(--ink); color: var(--void); box-shadow: 0 0 28px -6px rgb(111 223 255 / 0.7); }
+    .btn-ghost { border: 1px solid var(--line-2); color: var(--ink); }
+    .btn-ghost:hover { border-color: var(--signal); color: var(--ink); background: rgb(111 223 255 / 0.05); }
+    .btn svg { width: 1rem; height: 1rem; fill: currentColor; flex: none; }
+
+    .act-main {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 0.62rem 1.1rem; border-radius: var(--r-sm);
+      border: 1px solid rgb(111 223 255 / 0.45); color: var(--signal);
+      font-weight: 600; font-size: 0.93rem; text-decoration: none; white-space: nowrap;
       transition: background-color 0.15s, color 0.15s, border-color 0.15s;
     }
-    .btn-primary { background: var(--signal); color: var(--night); }
-    .btn-primary:hover { background: var(--ink); color: var(--night); }
-    .btn-ghost { border: 1px solid var(--line); color: var(--ink); }
-    .btn-ghost:hover { border-color: var(--signal); color: var(--ink); }
-    .btn svg { width: 1rem; height: 1rem; fill: currentColor; flex: none; }
-    .pending { color: var(--mist); font-size: 0.95rem; margin-top: 0.5rem; white-space: nowrap; }
-
-    /* ---------- Contact ---------- */
-    .contact { padding: clamp(4rem, 8vw, 6rem) 0; }
-    .contact .wrap { display: grid; gap: 2rem 4rem; }
-    @media (min-width: 900px) { .contact .wrap { grid-template-columns: 1fr 1fr; align-items: start; } }
-    .contact h2 {
-      font-family: var(--display); font-weight: 700; font-stretch: 90%;
-      font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -0.02em; line-height: 1.1; margin: 0 0 1rem;
+    .act-main:hover { background: var(--signal); border-color: var(--signal); color: var(--void); }
+    .act-sub {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;
+      padding: 0.35rem 0; color: var(--mist); font-size: 0.88rem; text-decoration: none; white-space: nowrap;
     }
-    .contact p { color: var(--mist); margin: 0; max-width: 30em; }
+    .act-sub:hover { color: var(--ink); text-decoration: underline; }
+    .act-sub svg { width: 0.95rem; height: 0.95rem; fill: currentColor; flex: none; }
+    .pending { color: var(--mist); font-size: 0.9rem; padding: 0.62rem 0; }
+    @media (min-width: 1040px) { .pending { text-align: center; } }
+
+    /* ======================================================
+       About + contact: plain lists, no boxes
+       ====================================================== */
+    .about, .contact { padding: clamp(4rem, 8vw, 6.5rem) 0 0; }
+    .contact { padding-bottom: clamp(4rem, 8vw, 6.5rem); }
+    .about .wrap, .contact .wrap { display: grid; gap: 2rem 4.5rem; }
+    @media (min-width: 900px) {
+      .about .wrap, .contact .wrap { grid-template-columns: 1fr 1fr; align-items: start; }
+    }
+    .about p, .contact p { color: var(--mist); margin: 0 0 1rem; max-width: 31em; }
+    .about p:last-child { margin-bottom: 0; }
+    .about a { color: var(--ink); }
+    .about a:hover { color: var(--signal); }
+
+    .principles { list-style: none; margin: 0 0 2.5rem; padding: 0; }
+    .principles li {
+      display: grid; grid-template-columns: 1.4rem 1fr; gap: 0 1rem; align-items: start;
+      padding: 1.1rem 0; border-bottom: 1px solid var(--line);
+      color: var(--mist); font-size: 0.97rem;
+    }
+    .principles li:first-child { padding-top: 0.25rem; }
+    .principles svg { grid-row: span 2; width: 1.4rem; height: 1.4rem; margin-top: 0.1rem; stroke: var(--signal); fill: none; stroke-width: 1.75; }
+    .principles strong { display: block; color: var(--ink); font-weight: 600; margin-bottom: 0.1rem; }
+    .about h3 { font-family: var(--display); font-weight: 700; font-size: 1.3rem; margin: 0 0 0.5rem; color: var(--ink); }
+    .services { margin: 0.25rem 0 1.1rem; padding-left: 1.1rem; color: var(--ink); }
+    .services li { margin: 0.25rem 0; }
+    .services li::marker { color: var(--signal); }
+
     .channels { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
     .channels a {
       display: flex; align-items: center; gap: 1rem;
       padding: 1rem 0.25rem; border-bottom: 1px solid var(--line);
-      color: var(--ink); text-decoration: none;
+      color: var(--ink); text-decoration: none; transition: color 0.15s;
     }
     .channels a:hover { color: var(--signal); }
-    .channels svg { width: 1.4rem; height: 1.4rem; fill: currentColor; flex: none; }
-    .channels .name { font-weight: 600; min-width: 5.5rem; }
+    .channels svg { width: 1.3rem; height: 1.3rem; fill: currentColor; flex: none; }
+    .channels .name { font-weight: 600; min-width: 6rem; }
     .channels .handle { color: var(--mist); }
 
-    /* ---------- About ---------- */
-    .about { padding: clamp(4rem, 8vw, 6rem) 0 0; }
-    .about .wrap { display: grid; gap: 2rem 4rem; }
-    @media (min-width: 900px) { .about .wrap { grid-template-columns: 1fr 1fr; align-items: start; } }
-    .about h2 {
-      font-family: var(--display); font-weight: 700; font-stretch: 90%;
-      font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -0.02em; line-height: 1.1; margin: 0 0 1rem;
-    }
-    .about p { color: var(--mist); margin: 0 0 1rem; max-width: 30em; }
-    .about p:last-child { margin-bottom: 0; }
-    .about a { color: var(--ink); }
-    .about a:hover { color: var(--signal); }
-    .principles { list-style: none; margin: 0 0 2.5rem; padding: 0; border-top: 1px solid var(--line); }
-    .principles li { padding: 1rem 0.25rem; border-bottom: 1px solid var(--line); color: var(--mist); }
-    .principles strong { display: block; color: var(--ink); font-weight: 600; margin-bottom: 0.2rem; }
-    .about h3 { font-family: var(--display); font-weight: 700; font-size: 1.25rem; margin: 0 0 0.5rem; color: var(--ink); }
-    .services { margin: 0.75rem 0 1rem; padding-left: 1.2rem; color: var(--mist); }
-    .services li { margin: 0.3rem 0; }
-
-    /* ---------- Footer ---------- */
-    .site-footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--mist); font-size: 0.9rem; }
+    .site-footer { border-top: 1px solid var(--line); padding: 2rem 0 calc(2rem + env(safe-area-inset-bottom)); color: var(--mist); font-size: 0.9rem; }
     .site-footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; }
     .site-footer p { margin: 0; }
+    .site-footer a { display: inline-block; padding: 0.4rem 0; }
+
+    /* ======================================================
+       Quick-find palette
+       ====================================================== */
+    dialog.palette {
+      width: min(40rem, calc(100vw - 2rem));
+      max-height: min(34rem, calc(100svh - 6rem));
+      margin: 12vh auto auto; padding: 0;
+      border: 1px solid var(--line-2); border-radius: var(--r-lg);
+      background: rgb(17 20 38 / 0.94);
+      backdrop-filter: blur(24px) saturate(1.4); -webkit-backdrop-filter: blur(24px) saturate(1.4);
+      color: var(--ink);
+      box-shadow: 0 50px 120px -20px rgb(0 0 0 / 0.85), 0 0 0 1px rgb(127 227 255 / 0.08);
+      overflow: hidden;
+    }
+    dialog.palette[open] { display: flex; flex-direction: column; animation: pop 0.22s var(--ease); }
+    dialog.palette::backdrop { background: rgb(4 5 12 / 0.65); backdrop-filter: blur(3px); }
+    @keyframes pop { from { opacity: 0; transform: translateY(-8px) scale(0.98); } }
+    .pal-search { display: flex; align-items: center; gap: 0.75rem; padding: 0 1.1rem; border-bottom: 1px solid var(--line); }
+    .pal-search svg { width: 1.15rem; height: 1.15rem; stroke: var(--signal); fill: none; stroke-width: 2; flex: none; }
+    .pal-search input {
+      flex: 1; height: 3.6rem; border: 0; background: none; outline: none;
+      color: var(--ink); font: inherit; font-size: 1.08rem;
+    }
+    .pal-search input::placeholder { color: var(--mist); }
+    .pal-list { list-style: none; margin: 0; padding: 0.5rem; overflow-y: auto; }
+    .pal-list a {
+      display: grid; grid-template-columns: 1fr auto; gap: 0.1rem 1rem; align-items: center;
+      padding: 0.7rem 0.85rem; border-radius: 10px; text-decoration: none; color: var(--ink);
+    }
+    .pal-list a .t { font-weight: 600; }
+    .pal-list a .s { grid-column: 1; color: var(--mist); font-size: 0.86rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pal-list a .g { grid-row: 1 / span 2; grid-column: 2; font-size: 0.78rem; color: var(--mist); }
+    .pal-list a[aria-selected="true"] { background: rgb(127 227 255 / 0.1); box-shadow: inset 0 0 0 1px rgb(127 227 255 / 0.35); }
+    .pal-empty { padding: 1.5rem 1rem; color: var(--mist); text-align: center; margin: 0; }
+    .pal-foot { display: flex; gap: 1.25rem; padding: 0.65rem 1.1rem; border-top: 1px solid var(--line); color: var(--mist); font-size: 0.8rem; }
+    @media (max-width: 560px) { .pal-foot { display: none; } dialog.palette { margin-top: 5rem; } }
+
+    /* ======================================================
+       Load sequence (one orchestrated moment) + reduced motion
+       ====================================================== */
+    .js .hero h1 .line, .js .hero .lede, .js .hero .finder, .js .hero .routes, .js .hero .feature {
+      opacity: 0; transform: translateY(14px);
+      animation: rise 0.9s var(--ease) forwards;
+    }
+    .js .hero h1 .line:nth-child(2) { animation-delay: 0.08s; }
+    .js .hero h1 .line:nth-child(3) { animation-delay: 0.16s; }
+    .js .hero .lede   { animation-delay: 0.26s; }
+    .js .hero .finder { animation-delay: 0.34s; }
+    .js .hero .routes { animation-delay: 0.42s; }
+    .js .hero .feature { animation-delay: 0.3s; }
+    @keyframes rise { to { opacity: 1; transform: none; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; transition-duration: 0.001ms !important; }
+      .horizon .ring { opacity: 0.3; }
+      .finder .caret { display: none; }
+    }
   </style>
+  <script>document.documentElement.classList.add('js');</script>
   <script src="/assets/analytics.js"></script>
 </head>
 <body>
@@ -364,11 +584,19 @@
 
   <!-- Icon sprite -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="ridgeGrad" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0" stop-color="#7FE3FF" stop-opacity="0.05"/>
+        <stop offset="0.75" stop-color="#7FE3FF" stop-opacity="0.7"/>
+        <stop offset="1" stop-color="#FF8FB4" stop-opacity="0.2"/>
+      </linearGradient>
+    </defs>
     <symbol id="i-beacon" viewBox="0 0 32 32">
       <path d="M11 29 L16 11 L21 29 M12.6 23 H19.4 M13.8 18 H18.2" fill="none" stroke="#C3B8EA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="16" cy="7.5" r="3" fill="#FF9EBB"/>
-      <path d="M9.5 4.5 A9 9 0 0 0 9.5 10.5 M22.5 4.5 A9 9 0 0 1 22.5 10.5" fill="none" stroke="#FF9EBB" stroke-width="1.75" stroke-linecap="round"/>
+      <circle cx="16" cy="7.5" r="3" fill="#FF8FB4"/>
+      <path d="M9.5 4.5 A9 9 0 0 0 9.5 10.5 M22.5 4.5 A9 9 0 0 1 22.5 10.5" fill="none" stroke="#FF8FB4" stroke-width="1.75" stroke-linecap="round"/>
     </symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
     <symbol id="i-github" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></symbol>
     <symbol id="i-telegram" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.210.258-1.910.177-.184 3.247-2.977 3.307-3.230.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></symbol>
     <symbol id="i-discord" viewBox="0 0 24 24"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></symbol>
@@ -376,7 +604,7 @@
   </svg>
 
   <header class="site-header" id="top">
-    <div class="wrap">
+    <div class="bar">
       <a class="brand" href="#top" aria-label="XDC Outpost, back to top">
         <svg aria-hidden="true"><use href="#i-beacon"/></svg>
         XDC Outpost
@@ -389,30 +617,48 @@
         <a class="wide" href="#contact">Contact</a>
         <a class="wide" href="https://github.com/s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="github/profile">GitHub</a>
       </nav>
+      <button class="find-btn" type="button" data-open-palette aria-label="Find a tool" aria-haspopup="dialog">
+        <svg aria-hidden="true"><use href="#i-search"/></svg><span class="label">Find a tool</span><kbd class="mod-key">Ctrl K</kbd>
+      </button>
     </div>
   </header>
 
   <main>
     <section class="hero" aria-labelledby="hero-title">
+      <canvas id="lattice" aria-hidden="true"></canvas>
       <div class="wrap hero-grid">
-        <h1 id="hero-title">Practical tools for the XDC Network</h1>
+        <h1 id="hero-title"><span class="line">Practical</span> <span class="line">tools for the</span> <span class="line ghost">XDC Network</span></h1>
         <p class="lede">Post-quantum messaging, node monitoring, offline signing and more, for node operators, masternode owners and everyday XDC users. Open source and built by <a href="https://github.com/s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="github/profile">s4njk4n</a>.</p>
 
+        <button class="finder" type="button" data-open-palette aria-haspopup="dialog">
+          <svg aria-hidden="true"><use href="#i-search"/></svg>
+          <span class="ph">Find a tool<span class="caret" aria-hidden="true"></span></span>
+          <kbd aria-hidden="true">/</kbd>
+        </button>
+
         <aside class="feature" id="pq" aria-labelledby="pq-title">
-          <p class="feature-flag"><span class="live" aria-hidden="true"></span>New and live on XDC mainnet</p>
+          <p class="flag"><span class="live" aria-hidden="true"></span>New and live on XDC mainnet</p>
           <h2 id="pq-title">Post-quantum encrypted messaging on XDC</h2>
           <p><strong>XDC PQOnchain</strong> encrypts messages with <span class="nb">ML-KEM-768</span>, the key-encapsulation standard NIST published as FIPS 203, and sends them as XDC transaction data. Keys are created and used only in your browser.</p>
+
           <figure class="payload">
-            <figcaption>What every message looks like on chain</figcaption>
+            <div class="payload-head">
+              <figcaption>What every message looks like on chain</figcaption>
+              <button class="replay" type="button" id="replay" aria-label="Replay the encryption illustration">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg>Replay
+              </button>
+            </div>
+            <div class="stream" id="stream" aria-hidden="true"></div>
             <div class="payload-bar" role="img" aria-label="Transaction data: 1,088-byte ML-KEM-768 ciphertext, 12-byte IV, then the AES-256-GCM encrypted message">
-              <span class="seg-kem">ML-KEM-768</span><span class="seg-iv">IV</span><span class="seg-msg">Message</span>
+              <span class="seg-kem"></span><span class="seg-iv"></span><span class="seg-msg"></span>
             </div>
             <dl class="payload-key">
-              <dt class="nb">ML-KEM-768</dt><dd>1,088-byte encapsulated key, opened only by the recipient’s private key</dd>
-              <dt>IV</dt><dd>12 random bytes</dd>
-              <dt>Message</dt><dd>Your text, encrypted with AES-256-GCM</dd>
+              <dt class="nb" style="--c: var(--signal)">ML-KEM-768</dt><dd>1,088-byte encapsulated key, opened only by the recipient’s private key</dd>
+              <dt style="--c: #CDBFFF">IV</dt><dd>12 random bytes</dd>
+              <dt style="--c: var(--flare)">Message</dt><dd>Your text, encrypted with AES-256-GCM</dd>
             </dl>
           </figure>
+
           <p class="why">A public chain keeps data forever. “Harvest now, decrypt later” attacks store encrypted data today to crack once quantum computers mature. ML-KEM is designed to hold up against them.</p>
           <div class="actions">
             <a class="btn btn-primary" href="/XDC_PQOnchain/" data-goatcounter-click="open/XDC_PQOnchain">Try PQOnchain</a>
@@ -420,22 +666,22 @@
           </div>
         </aside>
 
-        <nav class="routes" aria-label="Find a tool">
+        <nav class="routes" aria-label="Find a tool by task">
           <p>What are you working on?</p>
           <ul>
             <li><a href="/XDC_Atlas/" data-goatcounter-click="route/atlas">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6 9 4zM9 4v14M15 6v14"/></svg>
               Exploring the XDC ecosystem</a></li>
-            <li><a href="#nodes">
+            <li><a href="#nodes" data-filter-link="nodes">
               <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg>
               Running a node or masternode</a></li>
-            <li><a href="#transact">
+            <li><a href="#transact" data-filter-link="transact">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h14l-3-3M20 16H6l3 3"/></svg>
               Sending XDC and private messages</a></li>
-            <li><a href="#everyday">
+            <li><a href="#everyday" data-filter-link="everyday">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V5.5A1.5 1.5 0 0 1 6.5 4h6A1.5 1.5 0 0 1 14 5.5V20M3.5 20h12M7.5 7.5h4M14 9h2a1.5 1.5 0 0 1 1.5 1.5v5a1.25 1.25 0 0 0 2.5 0V8l-2.5-2.5"/></svg>
               Spending XDC day to day</a></li>
-            <li><a href="#learn">
+            <li><a href="#learn" data-filter-link="learn">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>
               Guides and reading</a></li>
           </ul>
@@ -457,144 +703,180 @@
 
     <section class="catalogue" id="tools" aria-labelledby="tools-title">
       <div class="wrap">
-        <h2 id="tools-title">Tools</h2>
-        <p>Web apps open straight in your browser. Self-hosted tools are installed from GitHub on your own server or GitHub account.</p>
+        <div class="cat-head">
+          <div>
+            <h2 id="tools-title">Tools</h2>
+            <p>Web apps open straight in your browser. Self-hosted tools are installed from GitHub on your own server or GitHub account.</p>
+          </div>
+          <div class="filters" role="group" aria-label="Show tools for">
+            <button type="button" data-filter="all" aria-pressed="true">All <span class="n"></span></button>
+            <button type="button" data-filter="nodes" aria-pressed="false">Nodes <span class="n"></span></button>
+            <button type="button" data-filter="transact" aria-pressed="false">Sending &amp; messaging <span class="n"></span></button>
+            <button type="button" data-filter="everyday" aria-pressed="false">Everyday <span class="n"></span></button>
+            <button type="button" data-filter="learn" aria-pressed="false">Exploring <span class="n"></span></button>
+          </div>
+        </div>
+        <p class="sr" aria-live="polite" id="filter-status"></p>
 
         <!-- Nodes -->
-        <div class="group" id="nodes">
+        <div class="group" id="nodes" data-group="nodes">
           <div class="group-head">
             <h3>Running a node or masternode</h3>
             <p>Set up, monitor and keep your infrastructure earning.</p>
           </div>
           <ul class="tools">
-            <li class="tool">
-              <h4>Plugin XDC Secure RPC &amp; WSS <span class="kind kind-repo">Self-hosted</span></h4>
-              <p class="desc">An installer for any XDC node operator, including Plugin RPCaaS. Sets up a hardened XDC node on Mainnet or Apothem with private RPC and WebSocket endpoints that only whitelisted IPs can reach.</p>
-              <p class="detail">One-script setup with Nginx and TLS. The included scripts manage the whitelist for you. Prefer not to do it yourself? Guided setup is US$90, or a full install US$200.</p>
+            <li class="tool" data-keywords="rpc websocket wss nginx tls whitelist plugin node install">
+              <div><h4>Plugin XDC Secure RPC &amp; WSS</h4><p class="kind">Self-hosted</p></div>
+              <div>
+                <p class="desc">An installer for any XDC node operator, including Plugin RPCaaS. Sets up a hardened XDC node on Mainnet or Apothem with private RPC and WebSocket endpoints that only whitelisted IPs can reach.</p>
+                <p class="detail">One-script setup with Nginx and TLS. The included scripts manage the whitelist for you. Prefer not to do it yourself? Guided setup is US$90, or a full install US$200.</p>
+              </div>
               <div class="actions">
-                <a class="btn btn-ghost" href="https://github.com/s4njk4n/Plugin-XDC-Secure-RPC-WSS" target="_blank" rel="noopener" data-goatcounter-click="github/Plugin-XDC-Secure-RPC-WSS"><svg aria-hidden="true"><use href="#i-github"/></svg>View on GitHub</a>
-                <a class="btn btn-ghost" href="https://github.com/s4njk4n/Plugin-XDC-Secure-RPC-WSS#done-for-you" target="_blank" rel="noopener" data-goatcounter-click="service/rpc-install">Have it installed for you</a>
+                <a class="act-main" href="https://github.com/s4njk4n/Plugin-XDC-Secure-RPC-WSS" target="_blank" rel="noopener" data-goatcounter-click="github/Plugin-XDC-Secure-RPC-WSS">View on GitHub</a>
+                <a class="act-sub" href="https://github.com/s4njk4n/Plugin-XDC-Secure-RPC-WSS#done-for-you" target="_blank" rel="noopener" data-goatcounter-click="service/rpc-install">Have it installed for you</a>
               </div>
             </li>
-            <li class="tool">
-              <h4>XDC Sentinel <span class="kind kind-repo">Self-hosted</span></h4>
-              <p class="desc">Get a phone alert when one of your XDC nodes goes offline, a reminder every 2 hours until it’s back, and a daily message confirming everything is running.</p>
-              <p class="detail">Notifications on iOS and Android. Free to self-host, or hosted for you at US$40 per node a year with a 30-day free trial.</p>
+            <li class="tool" data-keywords="monitor offline alert uptime notification phone">
+              <div><h4>XDC Sentinel</h4><p class="kind">Self-hosted</p></div>
+              <div>
+                <p class="desc">Get a phone alert when one of your XDC nodes goes offline, a reminder every 2 hours until it’s back, and a daily message confirming everything is running.</p>
+                <p class="detail">Notifications on iOS and Android. Free to self-host, or hosted for you at US$40 per node a year with a 30-day free trial.</p>
+              </div>
               <div class="actions">
-                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_Sentinel" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_Sentinel"><svg aria-hidden="true"><use href="#i-github"/></svg>View on GitHub</a>
-                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_Sentinel#hosted-monitoring" target="_blank" rel="noopener" data-goatcounter-click="service/sentinel-hosted">Run it for me</a>
+                <a class="act-main" href="https://github.com/s4njk4n/XDC_Sentinel" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_Sentinel">View on GitHub</a>
+                <a class="act-sub" href="https://github.com/s4njk4n/XDC_Sentinel#hosted-monitoring" target="_blank" rel="noopener" data-goatcounter-click="service/sentinel-hosted">Run it for me</a>
               </div>
             </li>
-            <li class="tool">
-              <h4>XDC Tycoon <span class="kind kind-repo">Self-hosted</span></h4>
-              <p class="desc">Watch your masternode owner addresses and get notified when their status changes (masternode, standby, slashed and so on) and when educational reward top-up payments arrive.</p>
-              <p class="detail">Notifications on iOS and Android. Free to self-host, or hosted for you at US$40 per node a year with a 30-day free trial.</p>
+            <li class="tool" data-keywords="masternode status standby slashed rewards top-up notification">
+              <div><h4>XDC Tycoon</h4><p class="kind">Self-hosted</p></div>
+              <div>
+                <p class="desc">Watch your masternode owner addresses and get notified when their status changes (masternode, standby, slashed and so on) and when educational reward top-up payments arrive.</p>
+                <p class="detail">Notifications on iOS and Android. Free to self-host, or hosted for you at US$40 per node a year with a 30-day free trial.</p>
+              </div>
               <div class="actions">
-                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_Tycoon" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_Tycoon"><svg aria-hidden="true"><use href="#i-github"/></svg>View on GitHub</a>
-                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_Tycoon#hosted-monitoring" target="_blank" rel="noopener" data-goatcounter-click="service/tycoon-hosted">Run it for me</a>
+                <a class="act-main" href="https://github.com/s4njk4n/XDC_Tycoon" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_Tycoon">View on GitHub</a>
+                <a class="act-sub" href="https://github.com/s4njk4n/XDC_Tycoon#hosted-monitoring" target="_blank" rel="noopener" data-goatcounter-click="service/tycoon-hosted">Run it for me</a>
               </div>
             </li>
-            <li class="tool">
-              <h4>XDC Epoch Notifier <span class="kind kind-repo">Self-hosted</span></h4>
-              <p class="desc">Get a phone notification every morning with the epoch rewards each of your masternodes earned, adjusted for your own transfers and fees. If a node earned nothing, or the check couldn’t run, you get a loud alert instead.</p>
-              <p class="detail">Notifications on iOS and Android. Free, with no server needed: it runs on your own GitHub account.</p>
+            <li class="tool" data-keywords="epoch rewards daily notification masternode github actions">
+              <div><h4>XDC Epoch Notifier</h4><p class="kind">Self-hosted</p></div>
+              <div>
+                <p class="desc">Get a phone notification every morning with the epoch rewards each of your masternodes earned, adjusted for your own transfers and fees. If a node earned nothing, or the check couldn’t run, you get a loud alert instead.</p>
+                <p class="detail">Notifications on iOS and Android. Free, with no server needed: it runs on your own GitHub account.</p>
+              </div>
               <div class="actions">
-                <a class="btn btn-primary" href="/XDC_Epoch_Notifier/" data-goatcounter-click="open/XDC_Epoch_Notifier">Set it up</a>
-                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_Epoch_Notifier" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_Epoch_Notifier"><svg aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
+                <a class="act-main" href="/XDC_Epoch_Notifier/" data-goatcounter-click="open/XDC_Epoch_Notifier">Set it up</a>
+                <a class="act-sub" href="https://github.com/s4njk4n/XDC_Epoch_Notifier" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_Epoch_Notifier"><svg aria-hidden="true"><use href="#i-github"/></svg>Source on GitHub</a>
               </div>
             </li>
-            <li class="tool">
-              <h4>Masternode Epoch Rewards Calculator <span class="kind kind-web">Web app</span></h4>
-              <p class="desc">Work out the epoch rewards an address earned as a masternode over a time period you choose, inferred from on-chain data.</p>
+            <li class="tool" data-keywords="epoch rewards calculator masternode earnings">
+              <div><h4>Masternode Epoch Rewards Calculator</h4><p class="kind">Web app</p></div>
+              <div>
+                <p class="desc">Work out the epoch rewards an address earned as a masternode over a time period you choose, inferred from on-chain data.</p>
+              </div>
               <div class="actions">
-                <a class="btn btn-primary" href="/XDC_Masternode_Rewards_Calculator/" data-goatcounter-click="open/XDC_Masternode_Rewards_Calculator">Open calculator</a>
+                <a class="act-main" href="/XDC_Masternode_Rewards_Calculator/" data-goatcounter-click="open/XDC_Masternode_Rewards_Calculator">Open calculator</a>
               </div>
             </li>
-            <li class="tool">
-              <h4>XDC FieldMedic <span class="kind kind-soon">In development</span></h4>
-              <p class="desc">A repair bot for XDC RPC endpoints. It will spot errors or lag as they happen and run remote repairs automatically, keeping downtime to a minimum.</p>
+            <li class="tool soon" data-keywords="repair rpc bot downtime">
+              <div><h4>XDC FieldMedic</h4><p class="kind kind-soon">In development</p></div>
+              <div>
+                <p class="desc">A repair bot for XDC RPC endpoints. It will spot errors or lag as they happen and run remote repairs automatically, keeping downtime to a minimum.</p>
+              </div>
               <div class="actions"><span class="pending">Not released yet</span></div>
             </li>
           </ul>
         </div>
 
         <!-- Transacting -->
-        <div class="group" id="transact">
+        <div class="group" id="transact" data-group="transact">
           <div class="group-head">
             <h3>Sending XDC and private messages</h3>
             <p>Message privately, sign safely, get paid and keep records.</p>
           </div>
           <ul class="tools">
-            <li class="tool">
-              <h4>XDC PQOnchain <span class="kind kind-pq">Post-quantum</span> <span class="kind kind-web">Web app</span></h4>
-              <p class="desc">Send post-quantum encrypted messages on the XDC Network. Generate an ML-KEM-768 keypair, connect MetaMask, send messages as transaction data, and decrypt anything sent to you from its transaction hash.</p>
-              <p class="detail">Uses ML-KEM-768 (NIST FIPS 203) with AES-256-GCM. Everything runs in your browser, with no servers involved.</p>
+            <li class="tool flagship" data-keywords="post-quantum encryption message ml-kem kyber metamask private">
+              <div><h4>XDC PQOnchain</h4><p class="kind kind-pq">Web app, post-quantum</p></div>
+              <div>
+                <p class="desc">Send post-quantum encrypted messages on the XDC Network. Generate an ML-KEM-768 keypair, connect MetaMask, send messages as transaction data, and decrypt anything sent to you from its transaction hash.</p>
+                <p class="detail">Uses ML-KEM-768 (NIST FIPS 203) with AES-256-GCM. Everything runs in your browser, with no servers involved.</p>
+              </div>
               <div class="actions">
-                <a class="btn btn-primary" href="/XDC_PQOnchain/" data-goatcounter-click="open/XDC_PQOnchain">Open app</a>
-                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_PQOnchain" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_PQOnchain"><svg aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
+                <a class="act-main" href="/XDC_PQOnchain/" data-goatcounter-click="open/XDC_PQOnchain">Open app</a>
+                <a class="act-sub" href="https://github.com/s4njk4n/XDC_PQOnchain" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_PQOnchain"><svg aria-hidden="true"><use href="#i-github"/></svg>Source on GitHub</a>
               </div>
             </li>
-            <li class="tool">
-              <h4>XDC Send Offline Helper <span class="kind kind-web">Web app</span></h4>
-              <p class="desc">Prepare transactions for an offline wallet and broadcast them once signed. Enter your address to get the transaction details, scan a QR code, or paste a signed transaction to send it to the network.</p>
-              <p class="detail">Works in a desktop or mobile browser.</p>
+            <li class="tool" data-keywords="offline cold wallet sign broadcast qr transaction">
+              <div><h4>XDC Send Offline Helper</h4><p class="kind">Web app</p></div>
+              <div>
+                <p class="desc">Prepare transactions for an offline wallet and broadcast them once signed. Enter your address to get the transaction details, scan a QR code, or paste a signed transaction to send it to the network.</p>
+                <p class="detail">Works in a desktop or mobile browser.</p>
+              </div>
               <div class="actions">
-                <a class="btn btn-primary" href="/XDC_Send_Offline_Helper/" data-goatcounter-click="open/XDC_Send_Offline_Helper">Open app</a>
+                <a class="act-main" href="/XDC_Send_Offline_Helper/" data-goatcounter-click="open/XDC_Send_Offline_Helper">Open app</a>
               </div>
             </li>
-            <li class="tool">
-              <h4>XDC Proof <span class="kind kind-web">Web app</span></h4>
-              <p class="desc">Turn an XDC payment into a PDF receipt. Enter the transaction hash, a description and optional sender and receiver details to download a verifiable proof for accounting or trade finance.</p>
-              <p class="detail">Add your own branding to each receipt.</p>
+            <li class="tool" data-keywords="receipt pdf proof payment accounting invoice trade finance">
+              <div><h4>XDC Proof</h4><p class="kind">Web app</p></div>
+              <div>
+                <p class="desc">Turn an XDC payment into a PDF receipt. Enter the transaction hash, a description and optional sender and receiver details to download a verifiable proof for accounting or trade finance.</p>
+                <p class="detail">Add your own branding to each receipt.</p>
+              </div>
               <div class="actions">
-                <a class="btn btn-primary" href="/XDC_Proof/" data-goatcounter-click="open/XDC_Proof">Create a receipt</a>
+                <a class="act-main" href="/XDC_Proof/" data-goatcounter-click="open/XDC_Proof">Create a receipt</a>
               </div>
             </li>
-            <li class="tool">
-              <h4>XDC ShopBot <span class="kind kind-bot">Telegram bot</span></h4>
-              <p class="desc">A beginner-friendly Telegram shop that sells digital products for XDC and delivers them automatically. Made for hobbyists who want to try running an online shop without advanced coding.</p>
-              <p class="detail">Free and open source. Try the demo before setting up your own.</p>
+            <li class="tool" data-keywords="telegram shop store sell digital products bot">
+              <div><h4>XDC ShopBot</h4><p class="kind">Telegram bot</p></div>
+              <div>
+                <p class="desc">A beginner-friendly Telegram shop that sells digital products for XDC and delivers them automatically. Made for hobbyists who want to try running an online shop without advanced coding.</p>
+                <p class="detail">Free and open source. Try the demo before setting up your own.</p>
+              </div>
               <div class="actions">
-                <a class="btn btn-primary" href="https://t.me/xdcshopbot" target="_blank" rel="noopener" data-goatcounter-click="open/xdcshopbot-demo">Try the demo bot</a>
-                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_ShopBot" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_ShopBot"><svg aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
+                <a class="act-main" href="https://t.me/xdcshopbot" target="_blank" rel="noopener" data-goatcounter-click="open/xdcshopbot-demo">Try the demo bot</a>
+                <a class="act-sub" href="https://github.com/s4njk4n/XDC_ShopBot" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_ShopBot"><svg aria-hidden="true"><use href="#i-github"/></svg>Source on GitHub</a>
               </div>
             </li>
           </ul>
         </div>
 
         <!-- Everyday -->
-        <div class="group" id="everyday">
+        <div class="group" id="everyday" data-group="everyday">
           <div class="group-head">
             <h3>Spending XDC day to day</h3>
             <p>See what everyday costs look like in XDC and stablecoins.</p>
           </div>
           <ul class="tools">
-            <li class="tool">
-              <h4>FuelSharp NSW <span class="kind kind-web">Web app</span></h4>
-              <p class="desc">Find the cheapest fuel near you in NSW at the price you’ll actually pay. Live prices from the NSW Government’s FuelCheck data, with your own discounts taken off, shown in AUDD, XDC or USDC.</p>
-              <p class="detail">Installs on your phone like an app. NSW only. Your discounts stay in your browser.</p>
+            <li class="tool" data-keywords="fuel petrol price nsw audd usdc cheap">
+              <div><h4>FuelSharp NSW</h4><p class="kind">Web app</p></div>
+              <div>
+                <p class="desc">Find the cheapest fuel near you in NSW at the price you’ll actually pay. Live prices from the NSW Government’s FuelCheck data, with your own discounts taken off, shown in AUDD, XDC or USDC.</p>
+                <p class="detail">Installs on your phone like an app. NSW only. Your discounts stay in your browser.</p>
+              </div>
               <div class="actions">
-                <a class="btn btn-primary" href="/XDC_FuelSharpNSW/" data-goatcounter-click="open/XDC_FuelSharpNSW">Find cheap fuel</a>
-                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_FuelSharpNSW" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_FuelSharpNSW"><svg aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
+                <a class="act-main" href="/XDC_FuelSharpNSW/" data-goatcounter-click="open/XDC_FuelSharpNSW">Find cheap fuel</a>
+                <a class="act-sub" href="https://github.com/s4njk4n/XDC_FuelSharpNSW" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_FuelSharpNSW"><svg aria-hidden="true"><use href="#i-github"/></svg>Source on GitHub</a>
               </div>
             </li>
           </ul>
         </div>
 
         <!-- Learning -->
-        <div class="group" id="learn">
+        <div class="group" id="learn" data-group="learn">
           <div class="group-head">
             <h3>Exploring XDC</h3>
             <p>Find your way around the wider XDC ecosystem: what exists, how to build on it, and which RPCs are up.</p>
           </div>
           <ul class="tools">
-            <li class="tool">
-              <h4>XDC Atlas <span class="kind kind-web">Web app</span></h4>
-              <p class="desc">A map of the XDC Network ecosystem. Browse 130+ tools, apps and services, about 150 developer guides from across the ecosystem, and live status for every public XDC RPC endpoint.</p>
-              <p class="detail">Community-maintained: anyone can add a project, guide or RPC endpoint by pull request. Replaces the XDC Library reading list.</p>
+            <li class="tool" data-keywords="ecosystem map directory guides reading rpc status library">
+              <div><h4>XDC Atlas</h4><p class="kind">Web app</p></div>
+              <div>
+                <p class="desc">A map of the XDC Network ecosystem. Browse 130+ tools, apps and services, about 150 developer guides from across the ecosystem, and live status for every public XDC RPC endpoint.</p>
+                <p class="detail">Community-maintained: anyone can add a project, guide or RPC endpoint by pull request. Replaces the XDC Library reading list.</p>
+              </div>
               <div class="actions">
-                <a class="btn btn-primary" href="/XDC_Atlas/" data-goatcounter-click="open/XDC_Atlas">Open XDC Atlas</a>
-                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_Atlas" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_Atlas"><svg aria-hidden="true"><use href="#i-github"/></svg>View on GitHub</a>
+                <a class="act-main" href="/XDC_Atlas/" data-goatcounter-click="open/XDC_Atlas">Open XDC Atlas</a>
+                <a class="act-sub" href="https://github.com/s4njk4n/XDC_Atlas" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_Atlas"><svg aria-hidden="true"><use href="#i-github"/></svg>Source on GitHub</a>
               </div>
             </li>
           </ul>
@@ -605,24 +887,30 @@
     <section class="about" id="about" aria-labelledby="about-title">
       <div class="wrap">
         <div>
-          <h2 id="about-title">About XDC Outpost</h2>
+          <h2 class="section-title" id="about-title">About XDC Outpost</h2>
           <p>XDC Outpost is run by s4njk4n, part of the XDC community since July 2017. Since 2021 I’ve been contributing on the technical side: tutorials and technical documentation for node operators and masternode owners, and the tools on this site.</p>
           <p>You can read my guides on <a href="https://www.xdc.dev/s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="about/xdc-dev">xdc.dev</a> and <a href="https://medium.com/@s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="about/medium">Medium</a>, many of them collected in the <a href="/XDC_Atlas/#reading" data-goatcounter-click="about/atlas-reading">XDC Atlas reading list</a>, and in earlier contributions to the XDC community documentation.</p>
           <p>Most of the tools started with a gap I noticed: something people kept asking for, or a job that was harder than it needed to be. I build the fix, tidy it up and share it here.</p>
         </div>
         <div>
           <ul class="principles">
-            <li><strong>Free and open source</strong>Every tool is MIT licensed, and you can read the code before you use it.</li>
-            <li><strong>Your keys stay yours</strong>Web apps run entirely in your browser. Self-hosted tools run on your own server or GitHub account.</li>
-            <li><strong>No accounts, no cookies</strong>This site counts visits with GoatCounter, which doesn’t use cookies or collect personal data.</li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>
+              <strong>Free and open source</strong>Every tool is MIT licensed, and you can read the code before you use it.</li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m11 12 8.5-8.5M17 6l2.5 2.5M15 8l2 2"/></svg>
+              <strong>Your keys stay yours</strong>Web apps run entirely in your browser. Self-hosted tools run on your own server or GitHub account.</li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.5 3.2 8.3 7.5 9.5 4.3-1.2 7.5-5 7.5-9.5V6L12 3z"/><path d="m9 12 2 2 4-4"/></svg>
+              <strong>No accounts, no cookies</strong>This site counts visits with GoatCounter, which doesn’t use cookies or collect personal data.</li>
           </ul>
           <h3>Need a hand?</h3>
           <p>The tools are free and always will be. If you’d rather not set them up yourself, or you need something built for your own project or business, I can help with:</p>
           <ul class="services">
-            <li>node monitoring and alerts</li>
-            <li>node hardening and private RPC setup</li>
-            <li>custom or white-label versions of these tools</li>
-            <li>new XDC tools built to order</li>
+            <li>Node monitoring and alerts</li>
+            <li>Node hardening and private RPC setup</li>
+            <li>Custom or white-label versions of these tools</li>
+            <li>New XDC tools built to order</li>
           </ul>
           <p><a href="#contact">Get in touch</a> on whichever platform suits you.</p>
         </div>
@@ -632,7 +920,7 @@
     <section class="contact" id="contact" aria-labelledby="contact-title">
       <div class="wrap">
         <div>
-          <h2 id="contact-title">Get in touch</h2>
+          <h2 class="section-title" id="contact-title">Get in touch</h2>
           <p>Questions about a tool, a bug to report, or an idea for something new? Message me on whichever platform suits you.</p>
         </div>
         <ul class="channels">
@@ -652,12 +940,243 @@
     </div>
   </footer>
 
+  <!-- Quick-find palette -->
+  <dialog class="palette" id="palette" aria-label="Find a tool">
+    <div class="pal-search">
+      <svg aria-hidden="true"><use href="#i-search"/></svg>
+      <input id="pal-input" type="text" placeholder="Search tools: alerts, receipt, fuel…" autocomplete="off" spellcheck="false"
+             role="combobox" aria-expanded="true" aria-controls="pal-list" aria-autocomplete="list">
+      <kbd>Esc</kbd>
+    </div>
+    <ul class="pal-list" id="pal-list" role="listbox" aria-label="Matching tools"></ul>
+    <div class="pal-foot" aria-hidden="true"><span><kbd>↑</kbd> <kbd>↓</kbd> to move</span><span><kbd>Enter</kbd> to open</span></div>
+  </dialog>
+
   <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-    const header = document.querySelector('.site-header');
-    const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 8);
-    addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
+  (() => {
+    const $ = (s, r = document) => r.querySelector(s);
+    const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    $('#year').textContent = new Date().getFullYear();
+
+    /* ---------- Header state ---------- */
+    const header = $('.site-header');
+    const onScroll = () => header.classList.toggle('scrolled', scrollY > 8);
+    addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+    /* ---------- Lattice field ----------
+       ML-KEM is lattice cryptography, so the hero background is a lattice:
+       points on a skewed basis, gently drifting, with a lens that
+       bends and lights the lattice around the pointer. */
+    const cv = $('#lattice'), ctx = cv.getContext('2d');
+    let W = 0, H = 0, DPR = 1, pts = [], cols = 0, rows = 0, running = false, visible = true, t0 = performance.now();
+    const ptr = { x: -9999, y: -9999, tx: -9999, ty: -9999 };
+    const beacons = [];
+
+    function build() {
+      DPR = Math.min(devicePixelRatio || 1, 2);
+      const r = cv.getBoundingClientRect(); W = r.width; H = r.height;
+      cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      const step = W < 640 ? 46 : 54;
+      const skew = step * 0.5;                    // basis b2 = (skew, step*0.86)
+      cols = Math.ceil(W / step) + 4; rows = Math.ceil(H / (step * 0.86)) + 2;
+      pts = [];
+      for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+        pts.push({ bx: (i - 2) * step + (j % 2) * skew, by: j * step * 0.86 - step * 0.4, ph: Math.random() * 6.28, x: 0, y: 0, a: 0 });
+      }
+      beacons.length = 0;
+      for (let k = 0; k < 7; k++) beacons.push({ i: (Math.random() * pts.length) | 0, ph: Math.random() * 6.28 });
+    }
+
+    function frame(now) {
+      const t = (now - t0) / 1000;
+      ptr.x += (ptr.tx - ptr.x) * 0.12; ptr.y += (ptr.ty - ptr.y) * 0.12;
+      ctx.clearRect(0, 0, W, H);
+      const R = Math.min(260, W * 0.35);
+      for (const p of pts) {
+        const dx0 = Math.sin(t * 0.35 + p.ph) * 3, dy0 = Math.cos(t * 0.3 + p.ph * 1.3) * 3;
+        let x = p.bx + dx0, y = p.by + dy0;
+        const dx = x - ptr.x, dy = y - ptr.y, d = Math.hypot(dx, dy);
+        let a = 0;
+        if (d < R) { const f = 1 - d / R; a = f * f; const push = a * 26; x += (dx / (d || 1)) * push; y += (dy / (d || 1)) * push; }
+        p.x = x; p.y = y; p.a = a;
+      }
+      // edges: right neighbour and the two neighbours below (triangular lattice)
+      ctx.lineWidth = 1;
+      for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+        const p = pts[j * cols + i];
+        const nbrs = [i + 1 < cols ? pts[j * cols + i + 1] : null];
+        if (j + 1 < rows) {
+          const off = j % 2;  // odd rows are shifted right
+          const a = i - 1 + off, b = i + off;
+          nbrs.push(a >= 0 ? pts[(j + 1) * cols + a] : null, b < cols ? pts[(j + 1) * cols + b] : null);
+        }
+        for (const q of nbrs) {
+          if (!q) continue;
+          const a = Math.max(p.a, q.a);
+          ctx.strokeStyle = a > 0.02 ? `rgba(127,227,255,${0.07 + a * 0.3})` : 'rgba(150,165,230,0.08)';
+          ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
+        }
+      }
+      for (const p of pts) {
+        ctx.fillStyle = p.a > 0.02 ? `rgba(200,240,255,${0.25 + p.a * 0.55})` : 'rgba(158,164,191,0.25)';
+        ctx.beginPath(); ctx.arc(p.x, p.y, 1.1 + p.a * 1.6, 0, 6.283); ctx.fill();
+      }
+      // a few nodes "transmit": soft pink pulses, like the outpost beacon
+      for (const b of beacons) {
+        const p = pts[b.i]; if (!p) continue;
+        const s = (Math.sin(t * 1.2 + b.ph) + 1) / 2;
+        ctx.fillStyle = `rgba(255,143,180,${0.25 + s * 0.6})`;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 2.2, 0, 6.283); ctx.fill();
+        ctx.strokeStyle = `rgba(255,143,180,${(1 - s) * 0.35})`;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 4 + s * 14, 0, 6.283); ctx.stroke();
+      }
+      if (running) requestAnimationFrame(frame);
+    }
+    function start() { if (!running && !reduce && visible && !document.hidden) { running = true; requestAnimationFrame(frame); } }
+    function stop() { running = false; }
+
+    build();
+    if (reduce) frame(performance.now()); else start();
+    let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { build(); if (reduce) frame(performance.now()); }, 120); });
+    new IntersectionObserver(([e]) => { visible = e.isIntersecting; visible ? start() : stop(); }).observe(cv);
+    document.addEventListener('visibilitychange', () => document.hidden ? stop() : start());
+    const hero = $('.hero');
+    hero.addEventListener('pointermove', e => { const r = cv.getBoundingClientRect(); ptr.tx = e.clientX - r.left; ptr.ty = e.clientY - r.top; if (ptr.x < -999) { ptr.x = ptr.tx; ptr.y = ptr.ty; } });
+    hero.addEventListener('pointerleave', () => { ptr.tx = ptr.ty = -9999; });
+
+    /* ---------- Payload illustration: plaintext becomes ciphertext ----------
+       Purely illustrative: random bytes, not a real ML-KEM ciphertext. */
+    const stream = $('#stream');
+    const HEX = '0123456789abcdef';
+    const rhex = n => { let s = ''; for (let i = 0; i < n; i++) s += HEX[(Math.random() * 16) | 0]; return s; };
+    const PLAIN = 'gm from the outpost. this message stays private, even after quantum computers arrive.';
+    const KEM = rhex(2176), IV = rhex(24);  // 1,088 bytes and 12 bytes, in hex
+    let raf2;
+    function renderFinal() {
+      const msg = rhex(PLAIN.length * 2 + 32);
+      stream.innerHTML = `<span class="k">0x${KEM.slice(0, 236)}…</span><span class="v">${IV}</span><span class="m">${msg}</span>`;
+    }
+    function play() {
+      cancelAnimationFrame(raf2);
+      if (reduce) { renderFinal(); return; }
+      const T = 1700; const st = performance.now();
+      const step = now => {
+        const k = Math.min(1, (now - st) / T);
+        const n = Math.floor(k * PLAIN.length);
+        const scr = rhex(Math.min(6, PLAIN.length - n));
+        stream.innerHTML = `<span class="k">0x${KEM.slice(0, Math.floor(k * 236))}</span><span class="m">${rhex(n * 2)}</span><span class="m">${scr}</span><span class="pt">${PLAIN.slice(n + scr.length)}</span>`;
+        if (k < 1) raf2 = requestAnimationFrame(step); else renderFinal();
+      };
+      stream.innerHTML = `<span class="pt">${PLAIN}</span>`;
+      setTimeout(() => raf2 = requestAnimationFrame(step), 500);
+    }
+    // Loop: plaintext (0.5s) → encrypt (1.7s) → hold ciphertext → repeat.
+    // Only runs while the card is on screen and the tab is visible; Replay restarts the cycle.
+    const CYCLE = 7000;
+    let loop = null, inView = false;
+    function startLoop(delay = 0) {
+      stopLoop();
+      if (reduce || !inView || document.hidden) return;
+      loop = setTimeout(function tick() { play(); loop = setTimeout(tick, CYCLE); }, delay);
+    }
+    function stopLoop() { clearTimeout(loop); loop = null; }
+    $('#replay').addEventListener('click', () => { play(); startLoop(CYCLE); });
+    new IntersectionObserver(es => {
+      inView = es[0].isIntersecting;
+      inView ? startLoop(loop === null ? 600 : 0) : stopLoop();
+    }, { threshold: 0.35 }).observe($('.payload'));
+    document.addEventListener('visibilitychange', () => document.hidden ? stopLoop() : startLoop(600));
+    stream.innerHTML = `<span class="pt">${PLAIN}</span>`;
+    if (reduce) renderFinal();
+
+    /* ---------- Tool filters ---------- */
+    const groups = $$('.group');
+    const btns = $$('.filters button');
+    const status = $('#filter-status');
+    const count = g => g === 'all' ? $$('.tool').length : $$(`.group[data-group="${g}"] .tool`).length;
+    btns.forEach(b => b.querySelector('.n').textContent = count(b.dataset.filter));
+    function setFilter(f, announce = true) {
+      btns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.filter === f)));
+      groups.forEach(g => g.hidden = f !== 'all' && g.dataset.group !== f);
+      if (announce) status.textContent = `Showing ${count(f)} tool${count(f) === 1 ? '' : 's'}`;
+    }
+    btns.forEach(b => b.addEventListener('click', () => {
+      setFilter(b.dataset.filter);
+      if (window.xdcTrack) xdcTrack('filter/' + b.dataset.filter);
+    }));
+    // Route chips and in-page group links: make sure the target group is visible
+    function revealFor(hash) {
+      const g = hash && document.getElementById(hash.slice(1));
+      if (g && g.classList.contains('group') && g.hidden) setFilter('all', false);
+    }
+    addEventListener('hashchange', () => revealFor(location.hash));
+    $$('a[href^="#"]').forEach(a => a.addEventListener('click', () => revealFor(a.getAttribute('href'))));
+
+    /* ---------- Quick-find palette ---------- */
+    const dlg = $('#palette'), input = $('#pal-input'), list = $('#pal-list');
+    const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+    $$('.mod-key').forEach(k => k.textContent = isMac ? '⌘K' : 'Ctrl K');
+
+    const items = $$('.tool').map((li, i) => {
+      const h = li.querySelector('h4');
+      const name = h.textContent.trim();
+      const link = li.querySelector('.act-main');
+      const group = li.closest('.group').querySelector('h3').textContent;
+      const desc = li.querySelector('.desc').textContent;
+      return { i, name, desc, group, href: link ? link.href : null, ext: link && link.target === '_blank', li,
+               hay: (name + ' ' + desc + ' ' + group + ' ' + (li.dataset.keywords || '')).toLowerCase() };
+    });
+    let shown = [], sel = 0;
+
+    function render() {
+      const q = input.value.trim().toLowerCase();
+      const terms = q.split(/\s+/).filter(Boolean);
+      shown = items.filter(it => terms.every(t => it.hay.includes(t)))
+                   .sort((a, b) => (b.name.toLowerCase().includes(q)) - (a.name.toLowerCase().includes(q)));
+      sel = Math.min(sel, Math.max(0, shown.length - 1));
+      list.innerHTML = shown.length ? '' : '<li><p class="pal-empty">No tools match. Try a broader word like “node” or “message”.</p></li>';
+      shown.forEach((it, k) => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.id = 'opt-' + k; a.setAttribute('role', 'option'); a.setAttribute('aria-selected', String(k === sel));
+        a.href = it.href || '#' + it.li.closest('.group').id;
+        if (it.ext) { a.target = '_blank'; a.rel = 'noopener'; }
+        a.innerHTML = `<span class="t"></span><span class="s"></span><span class="g"></span>`;
+        a.querySelector('.t').textContent = it.name;
+        a.querySelector('.s').textContent = it.desc;
+        a.querySelector('.g').textContent = it.href ? (it.ext ? 'Opens in new tab' : 'Open') : 'Details';
+        a.addEventListener('click', () => { if (window.xdcTrack) xdcTrack('find/' + it.name); dlg.close(); if (!it.href) revealFor(a.getAttribute('href')); });
+        a.addEventListener('pointermove', () => { if (sel !== k) { sel = k; mark(); } });
+        li.appendChild(a); list.appendChild(li);
+      });
+      input.setAttribute('aria-activedescendant', shown.length ? 'opt-' + sel : '');
+    }
+    function mark() {
+      $$('[role="option"]', list).forEach((a, k) => a.setAttribute('aria-selected', String(k === sel)));
+      input.setAttribute('aria-activedescendant', 'opt-' + sel);
+      const cur = $('#opt-' + sel); cur && cur.scrollIntoView({ block: 'nearest' });
+    }
+    function openPalette() {
+      if (dlg.open) return;
+      input.value = ''; sel = 0; render();
+      dlg.showModal(); input.focus();
+    }
+    $$('[data-open-palette]').forEach(b => b.addEventListener('click', openPalette));
+    input.addEventListener('input', () => { sel = 0; render(); });
+    input.addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); if (shown.length) { sel = (sel + 1) % shown.length; mark(); } }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); if (shown.length) { sel = (sel - 1 + shown.length) % shown.length; mark(); } }
+      else if (e.key === 'Enter') { e.preventDefault(); const a = $('#opt-' + sel); a && a.click(); }
+    });
+    dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });  // click backdrop to close
+    addEventListener('keydown', e => {
+      const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) || document.activeElement.isContentEditable;
+      if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) { e.preventDefault(); dlg.open ? dlg.close() : openPalette(); }
+      else if (e.key === '/' && !typing && !dlg.open) { e.preventDefault(); openPalette(); }
+    });
+  })();
   </script>
 </body>
 </html>
