@@ -124,7 +124,7 @@
     }
     .site-nav a:hover { color: var(--ink); }
     .brand { white-space: nowrap; }
-    @media (max-width: 560px) { .site-nav .wide { display: none; } }
+    @media (max-width: 640px) { .site-nav .wide { display: none; } }
     .nb { white-space: nowrap; }
     .site-nav a { white-space: nowrap; padding: 0.75rem 0; }
     @media (max-width: 380px) {
@@ -382,7 +382,8 @@
         XDC Outpost
       </a>
       <nav class="site-nav" aria-label="Main">
-        <a href="#pq">Post-quantum</a>
+        <a href="/XDC_Atlas/" data-goatcounter-click="nav/atlas">Atlas</a>
+        <a class="wide" href="#pq">Post-quantum</a>
         <a href="#tools">Tools</a>
         <a class="wide" href="#about">About</a>
         <a class="wide" href="#contact">Contact</a>
@@ -422,6 +423,9 @@
         <nav class="routes" aria-label="Find a tool">
           <p>What are you working on?</p>
           <ul>
+            <li><a href="/XDC_Atlas/" data-goatcounter-click="route/atlas">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6 9 4zM9 4v14M15 6v14"/></svg>
+              Exploring the XDC ecosystem</a></li>
             <li><a href="#nodes">
               <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg>
               Running a node or masternode</a></li>
@@ -433,7 +437,7 @@
               Spending XDC day to day</a></li>
             <li><a href="#learn">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>
-              Learning about XDC</a></li>
+              Guides and reading</a></li>
           </ul>
         </nav>
       </div>
@@ -580,15 +584,17 @@
         <!-- Learning -->
         <div class="group" id="learn">
           <div class="group-head">
-            <h3>Learning about XDC</h3>
-            <p>Background reading for developers and newcomers.</p>
+            <h3>Exploring XDC</h3>
+            <p>Find your way around the wider XDC ecosystem: what exists, how to build on it, and which RPCs are up.</p>
           </div>
           <ul class="tools">
             <li class="tool">
-              <h4>XDC Library <span class="kind kind-repo">Reading list</span></h4>
-              <p class="desc">A curated, organised collection of articles and resources about the XDC Network, to help you understand how it works and what you can build on it.</p>
+              <h4>XDC Atlas <span class="kind kind-web">Web app</span></h4>
+              <p class="desc">A map of the XDC Network ecosystem. Browse 130+ tools, apps and services, about 150 developer guides from across the ecosystem, and live status for every public XDC RPC endpoint.</p>
+              <p class="detail">Community-maintained: anyone can add a project, guide or RPC endpoint by pull request. Replaces the XDC Library reading list.</p>
               <div class="actions">
-                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDCLibrary" target="_blank" rel="noopener" data-goatcounter-click="github/XDCLibrary"><svg aria-hidden="true"><use href="#i-github"/></svg>Browse the library</a>
+                <a class="btn btn-primary" href="/XDC_Atlas/" data-goatcounter-click="open/XDC_Atlas">Open XDC Atlas</a>
+                <a class="btn btn-ghost" href="https://github.com/s4njk4n/XDC_Atlas" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_Atlas"><svg aria-hidden="true"><use href="#i-github"/></svg>View on GitHub</a>
               </div>
             </li>
           </ul>
@@ -601,7 +607,7 @@
         <div>
           <h2 id="about-title">About XDC Outpost</h2>
           <p>XDC Outpost is run by s4njk4n, part of the XDC community since July 2017. Since 2021 I’ve been contributing on the technical side: tutorials and technical documentation for node operators and masternode owners, and the tools on this site.</p>
-          <p>You can read my guides on <a href="https://www.xdc.dev/s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="about/xdc-dev">xdc.dev</a> and <a href="https://medium.com/@s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="about/medium">Medium</a>, many of them collected in the <a href="#learn">XDC Library</a>, and in earlier contributions to the XDC community documentation.</p>
+          <p>You can read my guides on <a href="https://www.xdc.dev/s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="about/xdc-dev">xdc.dev</a> and <a href="https://medium.com/@s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="about/medium">Medium</a>, many of them collected in the <a href="/XDC_Atlas/#reading" data-goatcounter-click="about/atlas-reading">XDC Atlas reading list</a>, and in earlier contributions to the XDC community documentation.</p>
           <p>Most of the tools started with a gap I noticed: something people kept asking for, or a job that was harder than it needed to be. I build the fix, tidy it up and share it here.</p>
         </div>
         <div>
