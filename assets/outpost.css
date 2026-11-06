@@ -39,11 +39,21 @@ a { text-decoration-thickness: 1px; text-underline-offset: 0.22em; }
 
 /* ---------- Header: the same floating glass bar as the home page ---------- */
 .site-header {
-  position: sticky; top: 0; z-index: 30;
+  position: sticky; top: 0; z-index: 1000;   /* above map panes (Leaflet uses up to 1000) */
   background: none; border: 0;
   backdrop-filter: none; -webkit-backdrop-filter: none;
-  padding: 0.75rem var(--gutter) 0;
+  /* env() keeps the bar clear of the iPhone status bar / notch when a page is
+     installed to the home screen (black-translucent status bar draws over content) */
+  padding: calc(0.75rem + env(safe-area-inset-top, 0px))
+           calc(var(--gutter) + env(safe-area-inset-right, 0px)) 0
+           calc(var(--gutter) + env(safe-area-inset-left, 0px));
   pointer-events: none;
+}
+/* Solid strip behind the status bar so content doesn't scroll visibly under the clock */
+.site-header::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0;
+  height: env(safe-area-inset-top, 0px);
+  background: var(--night);
 }
 .site-header.scrolled { border: 0; }
 .site-header > .wrap {
@@ -166,7 +176,7 @@ details.settings, details.more { border-radius: var(--r-sm); border-color: var(-
 
 /* ---------- Atlas ---------- */
 .ptabs {
-  top: 4.25rem; background: rgb(11 13 26 / 0.82);
+  top: calc(4.25rem + env(safe-area-inset-top, 0px)); background: rgb(11 13 26 / 0.82);
   backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4);
   border-bottom-color: var(--line);
 }

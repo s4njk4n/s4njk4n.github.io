@@ -115,7 +115,7 @@
        ====================================================== */
     .site-header {
       position: fixed; inset: 0 0 auto; z-index: 30;
-      padding: 0.75rem var(--gutter) 0;
+      padding: calc(0.75rem + env(safe-area-inset-top, 0px)) calc(var(--gutter) + env(safe-area-inset-right, 0px)) 0 calc(var(--gutter) + env(safe-area-inset-left, 0px));
       pointer-events: none;
     }
     .bar {
@@ -311,16 +311,7 @@
       background: rgb(6 7 16 / 0.7);
       border: 1px solid var(--line);
     }
-    .payload-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: 0 0 0.75rem; }
-    .payload figcaption { font-size: 0.84rem; color: var(--mist); margin: 0; }
-    .replay {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      background: none; border: 1px solid var(--line-2); border-radius: 999px;
-      color: var(--mist); font-size: 0.78rem; padding: 0.3rem 0.7rem; cursor: pointer;
-      transition: color 0.15s, border-color 0.15s;
-    }
-    .replay:hover { color: var(--ink); border-color: var(--signal); }
-    .replay svg { width: 0.85rem; height: 0.85rem; stroke: currentColor; fill: none; stroke-width: 2; }
+    .payload figcaption { font-size: 0.84rem; color: var(--mist); margin: 0 0 0.75rem; }
     .stream {
       font-family: var(--mono); font-size: 0.74rem; line-height: 1.55;
       height: calc(1.55em * 4); overflow: hidden;
@@ -611,7 +602,7 @@
       </a>
       <nav class="site-nav" aria-label="Main">
         <a href="/XDC_Atlas/" data-goatcounter-click="nav/atlas">Atlas</a>
-        <a class="wide" href="#pq">Post-quantum</a>
+        <a class="wide" href="/XDC_PQOnchain/" data-goatcounter-click="nav/pqonchain">Post-quantum</a>
         <a href="#tools">Tools</a>
         <a class="wide" href="#about">About</a>
         <a class="wide" href="#contact">Contact</a>
@@ -642,12 +633,7 @@
           <p><strong>XDC PQOnchain</strong> encrypts messages with <span class="nb">ML-KEM-768</span>, the key-encapsulation standard NIST published as FIPS 203, and sends them as XDC transaction data. Keys are created and used only in your browser.</p>
 
           <figure class="payload">
-            <div class="payload-head">
-              <figcaption>What every message looks like on chain</figcaption>
-              <button class="replay" type="button" id="replay" aria-label="Replay the encryption illustration">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg>Replay
-              </button>
-            </div>
+            <figcaption>What every message looks like on chain</figcaption>
             <div class="stream" id="stream" aria-hidden="true"></div>
             <div class="payload-bar" role="img" aria-label="Transaction data: 1,088-byte ML-KEM-768 ciphertext, 12-byte IV, then the AES-256-GCM encrypted message">
               <span class="seg-kem"></span><span class="seg-iv"></span><span class="seg-msg"></span>
@@ -1073,7 +1059,7 @@
       setTimeout(() => raf2 = requestAnimationFrame(step), 500);
     }
     // Loop: plaintext (0.5s) → encrypt (1.7s) → hold ciphertext → repeat.
-    // Only runs while the card is on screen and the tab is visible; Replay restarts the cycle.
+    // Only runs while the card is on screen and the tab is visible.
     const CYCLE = 7000;
     let loop = null, inView = false;
     function startLoop(delay = 0) {
@@ -1082,7 +1068,6 @@
       loop = setTimeout(function tick() { play(); loop = setTimeout(tick, CYCLE); }, delay);
     }
     function stopLoop() { clearTimeout(loop); loop = null; }
-    $('#replay').addEventListener('click', () => { play(); startLoop(CYCLE); });
     new IntersectionObserver(es => {
       inView = es[0].isIntersecting;
       inView ? startLoop(loop === null ? 600 : 0) : stopLoop();
