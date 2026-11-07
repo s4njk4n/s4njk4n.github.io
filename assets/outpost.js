@@ -7,6 +7,10 @@
 (function () {
   var doc = document.documentElement;
   doc.classList.add('outpost-js');
+
+  // Pages still declare the old dark theme-color; match the light theme instead.
+  var tc = document.querySelector('meta[name="theme-color"]');
+  if (tc) tc.setAttribute('content', '#FFFFFF');
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function ready(fn) {
@@ -51,13 +55,13 @@
       for (var j = 0; j < rows; j++) for (var i = 0; i < cols; i++)
         pts.push({ bx: (i - 2) * step + (j % 2) * step * 0.5, by: j * rowH - step * 0.4, ph: Math.random() * 6.28, x: 0, y: 0, a: 0 });
       beacons = [];
-      for (var k = 0; k < 5; k++) beacons.push({ i: (Math.random() * pts.length) | 0, ph: Math.random() * 6.28 });
+      for (var k = 0; k < 4; k++) beacons.push({ i: (Math.random() * pts.length) | 0, ph: Math.random() * 6.28 });
     }
 
     function edge(p, q) {
       if (!q) return;
       var a = Math.max(p.a, q.a);
-      ctx.strokeStyle = a > 0.02 ? 'rgba(111,223,255,' + (0.07 + a * 0.3) + ')' : 'rgba(150,165,230,0.075)';
+      ctx.strokeStyle = a > 0.02 ? 'rgba(29,92,150,' + (0.08 + a * 0.3) + ')' : 'rgba(15,30,51,0.06)';
       ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
     }
 
@@ -85,15 +89,15 @@
       }
       for (i = 0; i < pts.length; i++) {
         p = pts[i];
-        ctx.fillStyle = p.a > 0.02 ? 'rgba(200,240,255,' + (0.25 + p.a * 0.55) + ')' : 'rgba(158,164,191,0.24)';
+        ctx.fillStyle = p.a > 0.02 ? 'rgba(29,92,150,' + (0.3 + p.a * 0.5) + ')' : 'rgba(15,30,51,0.16)';
         ctx.beginPath(); ctx.arc(p.x, p.y, 1.1 + p.a * 1.5, 0, 6.283); ctx.fill();
       }
       for (i = 0; i < beacons.length; i++) {
         p = pts[beacons[i].i]; if (!p) continue;
-        var s = (Math.sin(t * 1.2 + beacons[i].ph) + 1) / 2;
-        ctx.fillStyle = 'rgba(255,143,180,' + (0.25 + s * 0.6) + ')';
+        var s = (Math.sin(t * 0.9 + beacons[i].ph) + 1) / 2;
+        ctx.fillStyle = 'rgba(176,132,51,' + (0.35 + s * 0.5) + ')';
         ctx.beginPath(); ctx.arc(p.x, p.y, 2.2, 0, 6.283); ctx.fill();
-        ctx.strokeStyle = 'rgba(255,143,180,' + ((1 - s) * 0.35) + ')';
+        ctx.strokeStyle = 'rgba(176,132,51,' + ((1 - s) * 0.35) + ')';
         ctx.beginPath(); ctx.arc(p.x, p.y, 4 + s * 14, 0, 6.283); ctx.stroke();
       }
       if (running) requestAnimationFrame(frame);
