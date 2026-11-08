@@ -41,14 +41,19 @@
     if (!ctx) return;
 
     var W = 0, H = 0, pts = [], cols = 0, rows = 0, beacons = [];
-    var running = false, visible = true, t0 = performance.now();
+    var running = false, visible = true, t0 = performance.now(), last = 0;
+    // Touch devices get a lighter canvas: mobile Safari kills pages that use too much graphics memory.
+    var touch = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
+    var BUDGET = touch ? 1.2e6 : 4e6;   // max canvas pixels
     var ptr = { x: -9999, y: -9999, tx: -9999, ty: -9999 };
 
     function build() {
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      var r = cv.getBoundingClientRect(); W = r.width; H = r.height;
+      var r = cv.getBoundingClientRect();
+      if (Math.abs(r.width - W) < 1 && Math.abs(r.height - H) < 2 && pts.length) return;   // e.g. Safari toolbar showing/hiding
+      W = r.width; H = r.height;
       if (!W || !H) return;
-      cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var dpr = Math.min(touch ? 1 : (window.devicePixelRatio || 1), 2, Math.sqrt(BUDGET / (W * H)));
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       var step = W < 640 ? 46 : 54, rowH = step * 0.86;
       cols = Math.ceil(W / step) + 4; rows = Math.ceil(H / rowH) + 2;
       pts = [];
@@ -65,7 +70,21 @@
       ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
     }
 
+    // Fade towards the edges inside the canvas (replaces a CSS mask, which costs an extra full-size layer)
+    function fade() {
+      var cx = W * 0.65, cy = H * 0.35, rx = W * 0.85, ry = H * 0.8;
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-in';
+      ctx.translate(cx, cy); ctx.scale(1, ry / rx);
+      var g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+      g.addColorStop(0.2, '#000'); g.addColorStop(0.78, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g; ctx.fillRect(-cx - 10, -(cy + 10) * rx / ry, W + 20, (H + 20) * rx / ry);
+      ctx.restore();
+    }
+
     function frame(now) {
+      if (running && touch && now - last < 33) { requestAnimationFrame(frame); return; }   // ~30fps on touch screens
+      last = now;
       var t = (now - t0) / 1000, i, j, p;
       ptr.x += (ptr.tx - ptr.x) * 0.12; ptr.y += (ptr.ty - ptr.y) * 0.12;
       ctx.clearRect(0, 0, W, H);
@@ -100,6 +119,7 @@
         ctx.strokeStyle = 'rgba(176,132,51,' + ((1 - s) * 0.35) + ')';
         ctx.beginPath(); ctx.arc(p.x, p.y, 4 + s * 14, 0, 6.283); ctx.stroke();
       }
+      fade();
       if (running) requestAnimationFrame(frame);
     }
     function start() { if (!running && !reduce && visible && !document.hidden && W) { running = true; requestAnimationFrame(frame); } }

@@ -177,9 +177,7 @@
     }
     #lattice {
       position: absolute; inset: 0; z-index: -1;
-      width: 100%; height: 100%;
-      -webkit-mask-image: radial-gradient(ellipse 90% 75% at 62% 40%, #000 25%, transparent 82%);
-              mask-image: radial-gradient(ellipse 90% 75% at 62% 40%, #000 25%, transparent 82%);
+      width: 100%; height: 100%;   /* the fade-out is drawn inside the canvas (no CSS mask layer) */
     }
     .hero::before {             /* faint ambient light behind the console */
       content: ""; position: absolute; z-index: -1;
@@ -189,12 +187,12 @@
     }
     .hero::after {              /* fine engineering grid, very low contrast */
       content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none;
+      /* top layer fades the grid out, so no CSS mask is needed */
       background-image:
+        linear-gradient(180deg, rgb(247 249 252 / 0) 0%, var(--void) 85%),
         linear-gradient(rgb(15 30 51 / 0.035) 1px, transparent 1px),
         linear-gradient(90deg, rgb(15 30 51 / 0.035) 1px, transparent 1px);
-      background-size: 72px 72px;
-      -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 85%);
-              mask-image: linear-gradient(180deg, #000 0%, transparent 85%);
+      background-size: 100% 100%, 72px 72px, 72px 72px;
     }
     .hero-grid {
       display: grid; gap: 2.25rem 4rem;
@@ -256,7 +254,6 @@
         linear-gradient(180deg, rgb(255 255 255 / 0.96), rgb(255 255 255 / 0.92)) padding-box,
         linear-gradient(150deg, rgb(29 92 150 / 0.35), var(--line) 45%, rgb(140 106 36 / 0.35)) border-box;
       border: 1px solid transparent;
-      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
       box-shadow: 0 24px 60px -28px rgb(15 30 51 / 0.28), 0 2px 6px -2px rgb(15 30 51 / 0.06);
     }
     .feature::before {          /* thin brass rule along the top: a "document" cue */
@@ -614,6 +611,13 @@
     .site-footer .wrap { display: block; }
     .foot-base { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem 2rem; padding-top: 1.25rem; border-top: 1px solid var(--line); font-size: 0.84rem; }
     .foot-base p { max-width: 52rem; }
+
+    /* Phones and tablets: frosted-glass blur over a live animation is very
+       memory-hungry in mobile Safari, so use solid backgrounds instead. */
+    @media (pointer: coarse), (max-width: 1060px) {
+      *, *::before, *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+      .site-header.scrolled { background: rgb(255 255 255 / 0.97); }
+    }
 
     /* ======================================================
        Load sequence (one orchestrated moment) + reduced motion
@@ -1171,14 +1175,20 @@
        points on a skewed basis, gently drifting, with a lens that
        bends and lights the lattice around the pointer. */
     const cv = $('#lattice'), ctx = cv.getContext('2d');
-    let W = 0, H = 0, DPR = 1, pts = [], cols = 0, rows = 0, running = false, visible = true, t0 = performance.now();
+    let W = 0, H = 0, DPR = 1, pts = [], cols = 0, rows = 0, running = false, visible = true, t0 = performance.now(), last = 0;
+    // Touch devices (phones, tablets) get a lighter canvas: mobile Safari kills pages that use too much graphics memory.
+    const touch = matchMedia('(pointer: coarse)').matches;
+    const BUDGET = touch ? 1.2e6 : 4e6;          // max canvas pixels
     const ptr = { x: -9999, y: -9999, tx: -9999, ty: -9999 };
     const beacons = [];
 
     function build() {
-      DPR = Math.min(devicePixelRatio || 1, 2);
-      const r = cv.getBoundingClientRect(); W = r.width; H = r.height;
-      cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      const r = cv.getBoundingClientRect();
+      if (Math.abs(r.width - W) < 1 && Math.abs(r.height - H) < 2 && pts.length) return;   // e.g. Safari toolbar showing/hiding
+      W = r.width; H = r.height;
+      if (!W || !H) return;
+      DPR = Math.min(touch ? 1 : (devicePixelRatio || 1), 2, Math.sqrt(BUDGET / (W * H)));
+      cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
       const step = W < 640 ? 46 : 54;
       const skew = step * 0.5;                    // basis b2 = (skew, step*0.86)
       cols = Math.ceil(W / step) + 4; rows = Math.ceil(H / (step * 0.86)) + 2;
@@ -1190,7 +1200,21 @@
       for (let k = 0; k < 5; k++) beacons.push({ i: (Math.random() * pts.length) | 0, ph: Math.random() * 6.28 });
     }
 
+    // Fade the lattice out towards the edges (replaces a CSS mask, which costs an extra full-size layer)
+    function fade() {
+      const cx = W * 0.62, cy = H * 0.4, rx = W * 0.9, ry = H * 0.75;
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-in';
+      ctx.translate(cx, cy); ctx.scale(1, ry / rx);
+      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+      g.addColorStop(0.25, '#000'); g.addColorStop(0.82, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g; ctx.fillRect(-cx - 10, -(cy + 10) * rx / ry, W + 20, (H + 20) * rx / ry);
+      ctx.restore();
+    }
+
     function frame(now) {
+      if (running && touch && now - last < 33) { requestAnimationFrame(frame); return; }   // ~30fps on touch screens
+      last = now;
       const t = (now - t0) / 1000;
       ptr.x += (ptr.tx - ptr.x) * 0.12; ptr.y += (ptr.ty - ptr.y) * 0.12;
       ctx.clearRect(0, 0, W, H);
@@ -1233,6 +1257,7 @@
         ctx.strokeStyle = `rgba(176,132,51,${(1 - s) * 0.35})`;
         ctx.beginPath(); ctx.arc(p.x, p.y, 4 + s * 14, 0, 6.283); ctx.stroke();
       }
+      fade();
       if (running) requestAnimationFrame(frame);
     }
     function start() { if (!running && !reduce && visible && !document.hidden) { running = true; requestAnimationFrame(frame); } }
