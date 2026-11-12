@@ -159,7 +159,10 @@
       transition: color 0.15s, background-color 0.15s;
     }
     .site-nav a:hover { color: var(--ink); background: rgb(15 30 51 / 0.05); }
-    @media (max-width: 900px) { .site-nav .wide { display: none; } }
+    /* Nav: the live pages come first; on phones the two least-used links drop out and labels shorten */
+    .site-nav .short { display: none; }
+    @media (max-width: 640px) { .site-nav .wide { display: none; } }
+    @media (max-width: 480px) { .site-nav .full { display: none; } .site-nav .short { display: inline; } }
     @media (max-width: 560px) {
       .site-nav a { padding: 0.5rem 0.55rem; }
       .bar { gap: 0.5rem; height: 3.75rem; }
@@ -199,7 +202,7 @@
     }
     .hero-grid {
       display: grid; gap: 2.25rem 4rem;
-      grid-template-areas: "eyebrow" "title" "lede" "routes" "feature";
+      grid-template-areas: "eyebrow" "title" "lede" "livebar" "routes" "feature";
       flex: 1;
     }
     .hero .eyebrow { grid-area: eyebrow; margin: 0 0 -0.75rem; }
@@ -207,11 +210,12 @@
     .hero .lede { grid-area: lede; }
     .hero .feature { grid-area: feature; }
     .hero .routes { grid-area: routes; }
+    .hero .livebar { grid-area: livebar; }
     @media (min-width: 1060px) {
       .hero-grid {
         grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
-        grid-template-areas: "eyebrow feature" "title feature" "lede feature" "routes feature";
-        grid-template-rows: auto auto auto 1fr;
+        grid-template-areas: "eyebrow feature" "title feature" "lede feature" "livebar feature" "routes feature";
+        grid-template-rows: auto auto auto auto 1fr;
         column-gap: 4.5rem;
       }
     }
@@ -233,6 +237,31 @@
     }
     .lede a { color: var(--ink); }
     .lede, .routes p { text-shadow: 0 0 16px var(--void), 0 0 4px var(--void); }
+
+    /* ---------- Live strip: chain head + one-click routes to the live pages ---------- */
+    .livebar {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1.25rem;
+      padding: 0.7rem 0.9rem; border-radius: var(--r-md);
+      border: 1px solid var(--line); background: rgb(255 255 255 / 0.85);
+      box-shadow: 0 1px 3px -1px rgb(15 30 51 / 0.06);
+      max-width: 34rem;
+    }
+    .livebar-head { display: flex; align-items: center; gap: 0.6rem; margin: 0; font-size: 0.92rem; color: var(--mist); font-variant-numeric: tabular-nums; }
+    .livebar-head .dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--line-2); flex: none; }
+    .livebar[data-state="live"] .livebar-head .dot { background: var(--mint); animation: live 2.8s ease-out infinite; }
+    .livebar-head .tag { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); }
+    .livebar[data-state="live"] .livebar-head .tag { color: var(--mint); }
+    .livebar-head b { color: var(--ink); font-weight: 600; }
+    .livebar-links { display: flex; gap: 0.5rem; margin-left: auto; }
+    .livebar-links a {
+      display: inline-flex; align-items: center; gap: 0.3rem; white-space: nowrap;
+      padding: 0.38rem 0.7rem; border-radius: var(--r-sm);
+      background: rgb(29 92 150 / 0.08); color: var(--signal);
+      font-size: 0.88rem; font-weight: 600; text-decoration: none;
+      transition: background-color 0.15s, color 0.15s;
+    }
+    .livebar-links a:hover { background: var(--signal); color: #FFFFFF; }
+    @media (max-width: 480px) { .livebar-links { margin-left: 0; width: 100%; } .livebar-links a { flex: 1; justify-content: center; } }
 
     .routes { margin-top: 0.25rem; }
     .routes p { margin: 0 0 0.8rem; font-weight: 600; color: var(--ink); font-size: 0.95rem; }
@@ -627,7 +656,7 @@
     /* ======================================================
        Load sequence (one orchestrated moment) + reduced motion
        ====================================================== */
-    .js .hero .eyebrow, .js .hero h1 .line, .js .hero .lede, .js .hero .routes, .js .hero .feature {
+    .js .hero .eyebrow, .js .hero h1 .line, .js .hero .lede, .js .hero .livebar, .js .hero .routes, .js .hero .feature {
       opacity: 0; transform: translateY(12px);
       animation: rise 0.9s var(--ease) forwards;
     }
@@ -635,6 +664,7 @@
     .js .hero h1 .line:nth-child(2) { animation-delay: 0.1s; }
     .js .hero h1 .line:nth-child(3) { animation-delay: 0.16s; }
     .js .hero .lede   { animation-delay: 0.26s; }
+    .js .hero .livebar { animation-delay: 0.31s; }
     .js .hero .routes { animation-delay: 0.36s; }
     .js .hero .feature { animation-delay: 0.3s; }
     @keyframes rise { to { opacity: 1; transform: none; } }
@@ -683,12 +713,11 @@
         XDC Outpost
       </a>
       <nav class="site-nav" aria-label="Main">
-        <a class="wide" href="#areas">Areas</a>
+        <a href="/XDC_Network_Stats/" data-goatcounter-click="nav/network-stats"><span class="full">Network stats</span><span class="short">Stats</span></a>
+        <a href="/XDC_Atlas/#rpc-status" data-goatcounter-click="nav/rpc-status"><span class="full">RPC status</span><span class="short">RPCs</span></a>
         <a href="#tools">Tools</a>
-        <a class="wide" href="#roadmap">In development</a>
-        <a href="/XDC_Atlas/" data-goatcounter-click="nav/atlas">Atlas</a>
+        <a class="wide" href="/XDC_Atlas/" data-goatcounter-click="nav/atlas">Atlas</a>
         <a class="wide" href="#about">About</a>
-        <a class="wide" href="#contact">Contact</a>
       </nav>
     </div>
   </header>
@@ -700,6 +729,14 @@
         <p class="eyebrow">Independent · Open source · Built on XDC</p>
         <h1 id="hero-title"><span class="line">Open infrastructure</span> <span class="line">for finance on <span class="accent">XDC</span></span></h1>
         <p class="lede">Node and validator operations, payments, post-quantum security and ecosystem data. Free to self-host, built in the open, and clearly labelled so you know what’s ready to use. Built by <a href="https://github.com/s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="github/profile">s4njk4n</a>, part of the XDC community since 2017.</p>
+
+        <div class="livebar" id="live" data-state="idle">
+          <p class="livebar-head" aria-live="off"><span class="dot" aria-hidden="true"></span><span class="tag">Mainnet</span><span id="live-text">Live network data</span></p>
+          <div class="livebar-links">
+            <a href="/XDC_Network_Stats/" data-goatcounter-click="hero/network-stats">Network stats <span aria-hidden="true">→</span></a>
+            <a href="/XDC_Atlas/#rpc-status" data-goatcounter-click="hero/rpc-status">RPC status <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
 
         <aside class="feature" id="pq" aria-labelledby="pq-title">
           <p class="flag"><span class="live" aria-hidden="true"></span>New and live on XDC mainnet</p>
@@ -1151,6 +1188,7 @@
           <ul>
             <li><a href="/XDC_Atlas/" data-goatcounter-click="footer/atlas">XDC Atlas</a></li>
             <li><a href="/XDC_Network_Stats/" data-goatcounter-click="footer/network-stats">XDC Network Stats</a></li>
+            <li><a href="/XDC_Atlas/#rpc-status" data-goatcounter-click="footer/rpc-status">RPC status</a></li>
             <li><a href="#roadmap">In development</a></li>
             <li><a href="https://github.com/s4njk4n?tab=repositories" target="_blank" rel="noopener" data-goatcounter-click="github/profile">Source code on GitHub</a></li>
             <li><a href="https://www.xdc.dev/s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="footer/xdc-dev">Guides on xdc.dev</a></li>
@@ -1355,6 +1393,53 @@
     // Area cards narrow the directory to that area
     $$('[data-filter-link]').forEach(a => a.addEventListener('click', () => setFilter(a.dataset.filterLink)));
   })();
+  </script>
+  <script>
+    /* Live strip: the current mainnet block, read from public RPC (same endpoints and failover order
+       as Network Stats). One tiny request every 6 s, only while the tab is visible. */
+    (function () {
+      var box = document.getElementById('live'), out = document.getElementById('live-text');
+      if (!box || !window.fetch) return;
+      var RPC = ['https://rpc.plugin.global/xdcmainnet', 'https://rpc.xdc.org', 'https://erpc.xinfin.network'];
+      var idx = 0, timer = null, busy = false, last = 0, fails = 0;
+      var BODY = JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_blockNumber', params: [] });
+      function ask(k) {
+        var url = RPC[(idx + k) % RPC.length];
+        var ctl = window.AbortController ? new AbortController() : null;
+        var t = setTimeout(function () { if (ctl) ctl.abort(); }, 5000);
+        return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: BODY, signal: ctl && ctl.signal })
+          .then(function (r) { return r.json(); })
+          .then(function (j) {
+            clearTimeout(t);
+            var n = parseInt(j && j.result, 16);
+            if (!isFinite(n)) throw new Error('bad answer');
+            idx = (idx + k) % RPC.length;
+            return n;
+          }, function (e) { clearTimeout(t); throw e; })
+          .catch(function (e) { if (k + 1 < RPC.length) return ask(k + 1); throw e; });
+      }
+      function poll() {
+        timer = null;
+        if (document.hidden || busy) return;
+        busy = true;
+        ask(0).then(function (n) {
+          fails = 0;
+          if (n !== last) { last = n; out.innerHTML = 'Block <b>#' + n.toLocaleString('en-US') + '</b>'; }
+          box.setAttribute('data-state', 'live');
+        }, function () {
+          fails++;
+          if (!last) out.textContent = 'Live network data';
+          box.setAttribute('data-state', 'idle');
+        }).then(function () {
+          busy = false;
+          if (!document.hidden) timer = setTimeout(poll, 6000 * Math.min(8, Math.pow(2, fails)));
+        });
+      }
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden && !timer) poll();
+      });
+      poll();
+    })();
   </script>
 </body>
 </html>
