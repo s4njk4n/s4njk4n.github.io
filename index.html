@@ -80,9 +80,8 @@
     }
 
     *, *::before, *::after { box-sizing: border-box; }
-    /* Large monitors: scale the whole rem-based layout up so it doesn't sit as a narrow strip in the middle */
-    @media (min-width: 1800px) { html { font-size: 112.5%; } }
-    @media (min-width: 2300px) { html { font-size: 125%; } }
+    /* Large monitors: widen the layout a little (text stays the same size) */
+    @media (min-width: 1800px) { :root { --wrap: 84rem; } }
     html { scroll-behavior: smooth; scroll-padding-top: 5.5rem; }
     @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 

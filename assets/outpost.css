@@ -61,6 +61,9 @@ h2, h3 { font-weight: 600 !important; }
 #i-beacon path:first-child { stroke: var(--ink); }
 #i-beacon circle + path { stroke: #B08433; }
 
+/* Large monitors: widen the layout a little, same as the home page (text stays the same size) */
+@media (min-width: 1800px) { :root { --wrap: 84rem; } }
+
 /* ---------- Header: full-width bar, frosted once you scroll ---------- */
 .site-header {
   position: sticky; top: 0; z-index: 1000;   /* above map panes (Leaflet uses up to 1000) */
