@@ -80,6 +80,9 @@
     }
 
     *, *::before, *::after { box-sizing: border-box; }
+    /* Large monitors: scale the whole rem-based layout up so it doesn't sit as a narrow strip in the middle */
+    @media (min-width: 1800px) { html { font-size: 112.5%; } }
+    @media (min-width: 2300px) { html { font-size: 125%; } }
     html { scroll-behavior: smooth; scroll-padding-top: 5.5rem; }
     @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
@@ -318,7 +321,9 @@
     .feature .why { font-size: 0.92rem; border-left: 2px solid var(--flare); padding-left: 0.9rem; }
 
     /* ---------- Horizon ---------- */
-    .horizon { display: block; width: 100%; height: auto; margin-top: clamp(3rem, 7vw, 5rem); }
+    /* Scales with width up to a cap; past that the ridge just extends sideways
+       (paths run beyond the viewBox and overflow is visible) instead of growing taller. */
+    .horizon { display: block; width: 100%; height: auto; max-height: 16.25rem; overflow: visible; margin-top: clamp(3rem, 7vw, 5rem); }
     .horizon .ridge { fill: none; stroke: url(#ridgeGrad); stroke-width: 1.25; }
     .horizon .ground { fill: var(--band); }
     .horizon .tower { fill: none; stroke: var(--mist); stroke-width: 1.75; stroke-linejoin: round; stroke-linecap: round; opacity: 0.85; }
@@ -648,7 +653,7 @@
   <!-- Icon sprite -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
-      <linearGradient id="ridgeGrad" x1="0" x2="1" y1="0" y2="0">
+      <linearGradient id="ridgeGrad" gradientUnits="userSpaceOnUse" x1="0" x2="1440" y1="0" y2="0">
         <stop offset="0" stop-color="#1D5C96" stop-opacity="0.04"/>
         <stop offset="0.75" stop-color="#1D5C96" stop-opacity="0.35"/>
         <stop offset="1" stop-color="#8C6A24" stop-opacity="0.2"/>
@@ -733,9 +738,9 @@
         </nav>
       </div>
 
-      <svg class="horizon" viewBox="0 -40 1440 260" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-        <path class="ground" d="M0 170 C 140 150, 260 120, 400 128 S 640 168, 780 150 S 980 92, 1080 96 S 1300 150, 1440 140 L1440 220 L0 220 Z"/>
-        <path class="ridge" d="M0 170 C 140 150, 260 120, 400 128 S 640 168, 780 150 S 980 92, 1080 96 S 1300 150, 1440 140"/>
+      <svg class="horizon" viewBox="0 -40 1440 260" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+        <path class="ground" d="M-1600 150 C -900 140, -140 190, 0 170 C 140 150, 260 120, 400 128 S 640 168, 780 150 S 980 92, 1080 96 S 1300 150, 1440 140 C 1580 130, 2300 165, 3040 150 L3040 220 L-1600 220 Z"/>
+        <path class="ridge" d="M-1600 150 C -900 140, -140 190, 0 170 C 140 150, 260 120, 400 128 S 640 168, 780 150 S 980 92, 1080 96 S 1300 150, 1440 140 C 1580 130, 2300 165, 3040 150"/>
         <g transform="translate(1080 96)">
           <path class="tower" d="M-16 0 L0 -58 L16 0 M-11 -18 H11 M-7 -34 H7 M-4 -46 L4 -46"/>
           <circle class="ring" cx="0" cy="-66" r="56"/>
