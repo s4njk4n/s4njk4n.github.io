@@ -1391,6 +1391,9 @@
     $$('a[href^="#"]').forEach(a => a.addEventListener('click', () => revealFor(a.getAttribute('href'))));
     // Area cards narrow the directory to that area
     $$('[data-filter-link]').forEach(a => a.addEventListener('click', () => setFilter(a.dataset.filterLink)));
+    // Arriving on a group's address (e.g. xdcoutpost.xyz/nodes -> /#nodes): show just that area, as the area cards do
+    const landed = groups.find(g => '#' + g.id === location.hash);
+    if (landed) { setFilter(landed.dataset.group, false); landed.scrollIntoView(); }
   })();
   </script>
   <script>
